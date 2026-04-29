@@ -1,0 +1,10 @@
+streamlit
+supabase
+python-dotenv
+cryptography
+PyMuPDF
+google-genai
+
+
+deepgram-sdk
+
