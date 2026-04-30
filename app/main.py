@@ -183,7 +183,8 @@ def render_dashboard(user_id):
                         storage_path = upload_pdf(file_bytes, user_id)
                         local_pdf_path = download_pdf(storage_path)
                         pages = split_pdf_to_pages(local_pdf_path)
-                        st.session_state.pdf_pages = pages
+                        if not st.session_state.get("pages"):
+                            st.session_state["pages"] = pages
                         logger.info("Successfully processed PDF and stored pages in session state")
                         if os.path.exists(local_pdf_path):
                             os.remove(local_pdf_path)
@@ -192,18 +193,15 @@ def render_dashboard(user_id):
                         st.error("Error processing PDF. Please check the logs.")
 
     # --- Processing Section ---
-    if "pdf_pages" in st.session_state:
-        pages = st.session_state.pdf_pages
-        
-        if "narrations" not in st.session_state:
-            st.session_state["narrations"] = []
+    if st.session_state["pages"]:
+        pages = st.session_state["pages"]
             
         st.markdown("<br>", unsafe_allow_html=True)
         with st.container(border=True):
             st.subheader("⚙️ Audio Settings")
             col_audio1, col_audio2 = st.columns(2)
             with col_audio1:
-                selected_voice = st.selectbox("Voice Model", ["aura-asteria-en", "aura-luna-en", "aura-orion-en"])
+                selected_voice = st.selectbox("Voice Model", ["aura-asteria-en", "aura-luna-en", "aura-orion-en", "aura-2-amalthea-en"])
             with col_audio2:
                 selected_speed = st.slider("Speech Speed", min_value=0.75, max_value=1.25, value=1.0, step=0.05)
                 
@@ -229,6 +227,8 @@ def render_dashboard(user_id):
                                 user_id=user_id,
                                 image_path=page['image_path']
                             )
+                            # Remove existing and append to maintain structure safely
+                            st.session_state["narrations"] = [n for n in st.session_state["narrations"] if n["page"] != page_num]
                             st.session_state["narrations"].append({
                                 "page": page_num,
                                 "text": narration,
@@ -252,7 +252,7 @@ def render_dashboard(user_id):
                         status_text = st.empty()
                         for i, narration_obj in enumerate(narrations):
                             page_num = narration_obj["page"]
-                            if "audio_path" in narration_obj:
+                            if page_num in st.session_state["audio_map"]:
                                 continue
                                 
                             status_text.text(f"Generating audio for page {page_num}...")
@@ -264,7 +264,7 @@ def render_dashboard(user_id):
                                     voice_model=selected_voice,
                                     speed=selected_speed
                                 )
-                                narration_obj["audio_path"] = audio_path
+                                st.session_state["audio_map"][page_num] = audio_path
                             except Exception as e:
                                 logger.error(f"Failed to generate audio for page {page_num}", exc_info=True)
                                 st.error(f"Failed to generate audio for page {page_num}.")
@@ -278,27 +278,34 @@ def render_dashboard(user_id):
                     narrations = get_all_narrations()
                     if not narrations or len(narrations) != len(pages):
                         st.warning("Please generate narrations for all pages first.")
-                    elif any("audio_path" not in n for n in narrations):
+                    elif any(n["page"] not in st.session_state["audio_map"] for n in narrations):
                         st.warning("Please generate audio for all pages first.")
                     else:
                         with st.spinner("Generating final video... This may take a minute."):
                             try:
-                                video_path = generate_video(narrations, user_id)
-                                st.session_state["final_video_path"] = video_path
+                                # Reconstruct narrations with audio path for video generation
+                                video_narrations = []
+                                for n in narrations:
+                                    n_copy = dict(n)
+                                    n_copy["audio_path"] = st.session_state["audio_map"].get(n["page"])
+                                    video_narrations.append(n_copy)
+                                    
+                                video_path = generate_video(video_narrations, user_id)
+                                st.session_state["video_path"] = video_path
                                 st.rerun()
                             except Exception as e:
                                 logger.error("Failed to generate final video", exc_info=True)
                                 st.error("Failed to generate final video.")
                                 
         # --- Final Video Section ---
-        if "final_video_path" in st.session_state:
+        if st.session_state["video_path"]:
             st.markdown("<br>", unsafe_allow_html=True)
             with st.container(border=True):
                 st.subheader("🎬 Final Rendered Video")
-                st.video(st.session_state["final_video_path"])
+                st.video(st.session_state["video_path"])
                 
                 try:
-                    with open(st.session_state["final_video_path"], "rb") as video_file:
+                    with open(st.session_state["video_path"], "rb") as video_file:
                         st.download_button(
                             label="⬇️ Download Video",
                             data=video_file,
@@ -322,7 +329,7 @@ def render_dashboard(user_id):
             status_icons = ""
             if page_narration:
                 status_icons += " ✅ Narration Ready"
-                if "audio_path" in page_narration:
+                if page['page_number'] in st.session_state["audio_map"]:
                     status_icons += " 🔊 Audio Ready"
                     
             with st.container(border=True):
@@ -340,8 +347,8 @@ def render_dashboard(user_id):
                         st.write(page_narration["text"])
                         st.markdown("<br>", unsafe_allow_html=True)
                         
-                        if "audio_path" in page_narration:
-                            st.audio(page_narration["audio_path"])
+                        if page['page_number'] in st.session_state["audio_map"]:
+                            st.audio(st.session_state["audio_map"][page['page_number']])
                         else:
                             if st.button("Generate Audio", key=f"audio_btn_{i}", use_container_width=True):
                                 with st.spinner("Generating audio..."):
@@ -353,7 +360,7 @@ def render_dashboard(user_id):
                                             voice_model=selected_voice,
                                             speed=selected_speed
                                         )
-                                        page_narration["audio_path"] = audio_path
+                                        st.session_state["audio_map"][page['page_number']] = audio_path
                                         st.rerun()
                                     except Exception as e:
                                         logger.error(f"Failed to generate audio for page {page['page_number']}", exc_info=True)
@@ -381,12 +388,21 @@ def render_dashboard(user_id):
                                     st.error("Failed to generate narration.")
 
 def main():
+    if "pages" not in st.session_state:
+        st.session_state["pages"] = []
+    if "narrations" not in st.session_state:
+        st.session_state["narrations"] = []
+    if "audio_map" not in st.session_state:
+        st.session_state["audio_map"] = {}
+    if "video_path" not in st.session_state:
+        st.session_state["video_path"] = None
+
     # Inject Custom CSS
     inject_custom_css()
     
     # Handle any OAuth callbacks from Supabase
     handle_oauth_callback()
-
+    
     # Get the current logged-in user
     user = get_current_user(st.session_state)
 
@@ -422,7 +438,7 @@ def main():
         if st.sidebar.button("Logout", use_container_width=True):
             logger.info(f"User {user.id} requested logout")
             logout()
-            for key in ["show_key_form", "pdf_pages"]:
+            for key in ["show_key_form", "pages", "narrations", "audio_map", "video_path"]:
                 st.session_state.pop(key, None)
             st.rerun()
             

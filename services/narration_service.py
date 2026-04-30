@@ -72,14 +72,17 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
         text_length = len(page_text) if page_text else 0
         logger.info(f"Detected content type: {content_type} | text_length={text_length}")
         
+        logger.info("Generating expressive narration with pauses")
+        
         common_instructions = (
             "CRITICAL INSTRUCTIONS for Voiceover Script:\n"
-            "- Output must feel like a documentary narration or video voiceover. Not a chatbot.\n"
+            "- Output must feel like a natural, human documentary narration or video voiceover. Not a chatbot.\n"
             "- Limit output to 4-8 sentences per page.\n"
             "- DO NOT use conversational filler like 'Hello', 'Today we are going to', 'Let's break down', 'Do you have any questions?', or 'Would you like me to...'\n"
             "- Avoid long paragraphs. Keep sentences clear, direct, and medium-length.\n"
             "- Do not over-explain, add extra examples, or repeat yourself.\n"
             "- Focus ONLY on key ideas, main actions, and essential context.\n"
+            "- ADD HUMAN SPEECH LAYER: Vary sentence rhythm. Use '...' for natural thinking or dramatic pauses. Use '.' for short pauses. Use occasional conversational fillers (e.g., 'um', 'uh', 'hmm') ONLY when natural for the specific tone, but DO NOT over-insert them. Focus on subtle realism.\n"
         )
         
         if content_type == "visual":
@@ -87,10 +90,12 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
                 "You are an expert narrator for manga/comics.\n\n"
                 f"{common_instructions}\n"
                 "Specific Rules:\n"
-                "* Use a storytelling tone.\n"
-                "* Describe the main scene only.\n"
-                "* Include key dialogue if visible.\n"
-                "* Avoid excessive detail."
+                "* Use an expressive, dramatic, and storytelling tone.\n"
+                "* Add natural reactions (e.g., 'oh...', 'wait...', 'what just happened?').\n"
+                "* Include tension pauses ('...') and emotional emphasis.\n"
+                "* Describe the main scene only and include key dialogue if visible.\n"
+                "* Avoid excessive detail.\n"
+                "* Example style: 'This changes everything... wait... is that really him?'"
             )
         elif content_type == "presentation":
             base_prompt = (
@@ -98,6 +103,8 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
                 f"{common_instructions}\n"
                 "Specific Rules:\n"
                 "* Keep it concise and structured.\n"
+                "* Use an energetic and engaging tone.\n"
+                "* Add light emphasis and structured pauses for clarity.\n"
                 "* Highlight the top 3-5 key points.\n"
                 "* Avoid long explanations."
             )
@@ -107,7 +114,9 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
                 f"{common_instructions}\n"
                 "Specific Rules:\n"
                 "* Provide a clear and structured explanation.\n"
-                "* Use a formal but simple tone.\n"
+                "* Use a formal, calm, clear, and professional tone.\n"
+                "* Add slight pauses for clarity.\n"
+                "* NO filler words (no 'um', 'uh') and NO dramatic reactions.\n"
                 "* Summarize the content, do not lecture.\n"
                 "* Example tone: 'This section explains...', 'The concept focuses on...'"
             )

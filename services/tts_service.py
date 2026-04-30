@@ -39,7 +39,7 @@ def generate_audio(text: str, user_id: str, page: int, voice_model: str = "aura-
                     
         except Exception as e:
             if speed != 1.0:
-                logger.warning(f"Deepgram failed with speed parameter, falling back to default speed. Error: {e}")
+                logger.warning("Deepgram failed with speed parameter, falling back to default speed.")
                 # Fallback without speed
                 response = deepgram.speak.v1.audio.generate(text=text, model=voice_model)
                 with open(temp_file.name, "wb") as audio_file:
