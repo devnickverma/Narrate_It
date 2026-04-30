@@ -5,7 +5,7 @@
 - [x] API Key encryption + storage
 - [x] PDF upload + page splitting
 - [x] Gemini narration generation
-- [ ] Deepgram TTS audio generation
+- [x] Deepgram TTS audio generation
 - [ ] pgvector memory system
 - [ ] FFmpeg video assembly
 - [ ] Supabase video storage
