@@ -48,6 +48,22 @@ def inject_custom_css():
             margin: auto;
         }
 
+        /* ── Wider Popup Dialog ── */
+        [data-testid="stDialog"] > div {
+            max-width: 800px !important;
+            width: 800px !important;
+        }
+
+        /* ── Strip inner vertical-block padding inside page columns ── */
+        .page-row-marker + div[data-testid="stHorizontalBlock"] [data-testid="stVerticalBlockBorderWrapper"] {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .page-row-marker + div[data-testid="stHorizontalBlock"] [data-testid="stVerticalBlock"] {
+            gap: 0 !important;
+            padding: 0 !important;
+        }
+
         .stApp { background-color: #0B0F19; }
         [data-testid="stAppViewContainer"] { background-color: #0B0F19; }
         
@@ -351,7 +367,7 @@ def render_api_keys_settings(user_id):
 # ─────────────────────────────────────────────
 # PAGE PREVIEW DIALOG
 # ─────────────────────────────────────────────
-@st.dialog("Page Detail")
+@st.dialog("Page Detail", width="large")
 def show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_speed):
     sel_page = next((p for p in pages if p['page_number'] == pn), None)
     if not sel_page:
@@ -367,7 +383,7 @@ def show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_spe
         has_audio = pn in st.session_state.get("audio_map", {})
 
         if page_nar:
-            st.text_area("Narration Script", page_nar["text"], height=200, disabled=True, key=f"popup_script_{pn}")
+            st.text_area("Narration Script", page_nar["text"], height=280, disabled=True, key=f"popup_script_{pn}")
             if has_audio:
                 st.audio(st.session_state["audio_map"][pn])
             else:
@@ -518,81 +534,83 @@ def render_dashboard(user_id):
                         logger.error("Video generation failed", exc_info=True)
                         st.error(f"Error: {str(e)}")
 
-    # ── Row 3: Horizontal page strip ──
-
+    # ── Row 3: Page buttons (left) + Final output (right) ── SAME ROW ──
     st.markdown("<hr style='margin:8px 0; border-color:#1E293B;'>", unsafe_allow_html=True)
-    
-    st.markdown('<div class="page-row-marker"></div>', unsafe_allow_html=True)
-    
-    css_rules = []
-    css_rules.append("""
-        .page-row-marker + div[data-testid="stHorizontalBlock"] {
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            padding-bottom: 12px;
-            gap: 2px !important;
-            justify-content: flex-start !important;
-        }
-        .page-row-marker + div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-            min-width: 38px !important;
-            max-width: 38px !important;
-            flex: 0 0 38px !important;
-            width: 38px !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        .page-row-marker + div[data-testid="stHorizontalBlock"] button {
-            height: 36px !important;
-            padding: 0 !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 6px !important;
-        }
-    """)
-    
-    cols = st.columns(len(pages))
-    for idx, page in enumerate(pages):
-        pn = page['page_number']
-        has_nar = any(n["page"] == pn for n in narrations)
-        has_aud = pn in st.session_state["audio_map"]
-        
-        bg_color = "#1E293B"
-        text_color = "#94A3B8"
-        border_color = "#334155"
-        
-        if has_aud:
-            bg_color = "#059669"
-            text_color = "#FFFFFF"
-            border_color = "#047857"
-        elif has_nar:
-            bg_color = "#D97706"
-            text_color = "#FFFFFF"
-            border_color = "#B45309"
-            
-        css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button {{ background-color: {bg_color} !important; color: {text_color} !important; border: 2px solid {border_color} !important; }}")
-        css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button p {{ color: {text_color} !important; font-weight: 700 !important; }}")
-        
-        with cols[idx]:
-            if st.button(f"P{pn}", key=f"pill_{pn}"):
-                show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_speed)
 
-    st.markdown(f"<style>{''.join(css_rules)}</style>", unsafe_allow_html=True)
+    has_video = st.session_state.get("video_file")
+    if has_video:
+        row_left, row_right = st.columns([3, 1])
+    else:
+        row_left = st.container()
+        row_right = None
 
+    with row_left:
+        st.markdown('<div class="page-row-marker"></div>', unsafe_allow_html=True)
 
+        css_rules = []
+        css_rules.append("""
+            .page-row-marker + div[data-testid="stHorizontalBlock"] {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                padding-bottom: 4px;
+                gap: 2px !important;
+                justify-content: flex-start !important;
+            }
+            .page-row-marker + div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+                min-width: 38px !important;
+                max-width: 38px !important;
+                flex: 0 0 38px !important;
+                width: 38px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .page-row-marker + div[data-testid="stHorizontalBlock"] button {
+                height: 36px !important;
+                padding: 0 !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 6px !important;
+            }
+        """)
 
-    # ── Row 5: Final video (compact) ──
-    if st.session_state.get("video_file"):
-        st.markdown("<hr style='margin:12px 0; border-color:#1E293B;'>", unsafe_allow_html=True)
-        _, vid_center, _ = st.columns([1, 2, 1])
-        with vid_center:
-            st.markdown("<p class='toolbar-label'>Final Output</p>", unsafe_allow_html=True)
+        cols = st.columns(len(pages))
+        for idx, page in enumerate(pages):
+            pn = page['page_number']
+            has_nar = any(n["page"] == pn for n in narrations)
+            has_aud = pn in st.session_state["audio_map"]
+
+            bg_color = "#1E293B"
+            text_color = "#94A3B8"
+            border_color = "#334155"
+
+            if has_aud:
+                bg_color = "#059669"
+                text_color = "#FFFFFF"
+                border_color = "#047857"
+            elif has_nar:
+                bg_color = "#D97706"
+                text_color = "#FFFFFF"
+                border_color = "#B45309"
+
+            css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button {{ background-color: {bg_color} !important; color: {text_color} !important; border: 2px solid {border_color} !important; }}")
+            css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button p {{ color: {text_color} !important; font-weight: 700 !important; }}")
+
+            with cols[idx]:
+                if st.button(f"P{pn}", key=f"pill_{pn}"):
+                    show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_speed)
+
+        st.markdown(f"<style>{''.join(css_rules)}</style>", unsafe_allow_html=True)
+
+    if row_right is not None:
+        with row_right:
+            st.markdown("<p style='font-size:0.75rem; color:#64748B; text-align:center; margin-bottom:4px;'>Final Output</p>", unsafe_allow_html=True)
             st.video(st.session_state["video_file"])
             try:
                 with open(st.session_state["video_file"], "rb") as vf:
-                    st.download_button("Download Video", data=vf, file_name="narration_video.mp4", mime="video/mp4", use_container_width=True)
+                    st.download_button("Download", data=vf, file_name="narration_video.mp4", mime="video/mp4", use_container_width=True)
             except Exception as e:
                 logger.error("Video download failed", exc_info=True)
 
