@@ -466,6 +466,7 @@ def render_dashboard(user_id):
             st.session_state["narrations"] = []
             st.session_state["audio_map"] = {}
             st.session_state["video_file"] = None
+            st.session_state["video_url"] = None
             st.session_state["current_pdf"] = uploaded_file.name
             st.rerun()
 
@@ -578,6 +579,27 @@ def render_dashboard(user_id):
                             video_nars.append(nc)
                         video_path = generate_video(video_nars, user_id)
                         st.session_state["video_file"] = video_path
+                        
+                        try:
+                            from services.supabase_client import get_supabase_client
+                            
+                            supabase = get_supabase_client()
+                            file_name = f"{int(time.time())}_{user_id}.mp4"
+                            
+                            with open(video_path, "rb") as vf:
+                                video_bytes = vf.read()
+                                
+                            supabase.storage.from_("videos").upload(
+                                path=file_name,
+                                file=video_bytes,
+                                file_options={"content-type": "video/mp4"}
+                            )
+                            
+                            public_url = supabase.storage.from_("videos").get_public_url(file_name)
+                            st.session_state["video_url"] = public_url
+                        except Exception as storage_err:
+                            logger.error(f"Failed to upload video to Supabase: {storage_err}", exc_info=True)
+                            
                         st.rerun()
                     except Exception as e:
                         logger.error("Video generation failed", exc_info=True)
@@ -629,6 +651,9 @@ def render_dashboard(user_id):
             try:
                 with open(st.session_state["video_file"], "rb") as vf:
                     st.download_button("Download", data=vf, file_name="narration_video.mp4", mime="video/mp4", use_container_width=True)
+                
+                if st.session_state.get("video_url"):
+                    st.markdown(f"<div style='text-align:center; margin-top:8px;'><a href='{st.session_state['video_url']}' target='_blank' style='font-size:0.75rem; color:#3B82F6; text-decoration:none;'>Stored Video Link</a></div>", unsafe_allow_html=True)
             except Exception as e:
                 logger.error("Video download failed", exc_info=True)
 
@@ -637,7 +662,7 @@ def render_dashboard(user_id):
 # MAIN
 # ─────────────────────────────────────────────
 def main():
-    for key, default in [("pages", []), ("narrations", []), ("audio_map", {}), ("video_file", None), ("selected_page", None), ("current_pdf", None)]:
+    for key, default in [("pages", []), ("narrations", []), ("audio_map", {}), ("video_file", None), ("video_url", None), ("selected_page", None), ("current_pdf", None)]:
         if key not in st.session_state:
             st.session_state[key] = default
 
@@ -651,6 +676,28 @@ def main():
         st.sidebar.markdown(f"**{user.email}**")
         st.sidebar.markdown("---")
         nav = st.sidebar.radio("Nav", ["Dashboard", "Settings"], label_visibility="collapsed")
+        st.sidebar.markdown("---")
+        
+        st.sidebar.markdown("**Video History**")
+        try:
+            from services.supabase_client import get_supabase_client
+            supabase = get_supabase_client()
+            files = supabase.storage.from_("videos").list()
+            if files:
+                user_files = [f for f in files if f.get("name") and user.id in f["name"]]
+                if user_files:
+                    for f in sorted(user_files, key=lambda x: x.get("created_at", ""), reverse=True):
+                        fname = f["name"]
+                        public_url = supabase.storage.from_("videos").get_public_url(fname)
+                        st.sidebar.markdown(f"• <a href='{public_url}' target='_blank' style='font-size:0.8rem; color:#3B82F6; text-decoration:none;'>{fname}</a>", unsafe_allow_html=True)
+                else:
+                    st.sidebar.markdown("<p style='font-size:0.8rem;color:#64748B;'>No videos yet.</p>", unsafe_allow_html=True)
+            else:
+                st.sidebar.markdown("<p style='font-size:0.8rem;color:#64748B;'>No videos yet.</p>", unsafe_allow_html=True)
+        except Exception as e:
+            logger.error(f"Failed to load video history: {e}", exc_info=True)
+            st.sidebar.markdown("<p style='font-size:0.8rem;color:#64748B;'>Failed to load history.</p>", unsafe_allow_html=True)
+
         st.sidebar.markdown("---")
         if st.sidebar.button("Logout", use_container_width=True):
             logger.info(f"User {user.id} requested logout")

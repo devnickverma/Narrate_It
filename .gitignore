@@ -6,3 +6,5 @@
 .notes.md
 
 .Implementation_plan.md
+
+.streamlit/secrets.toml
