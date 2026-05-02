@@ -33,20 +33,20 @@ def generate_video(narrations: list, user_id: str) -> str:
                     # Truncate text just in case to prevent massive overflow, or show key concepts
                     short_text = subtitle_text[:120] + "..." if len(subtitle_text) > 120 else subtitle_text
                     txt_clip = TextClip(
-                        text=short_text,
+                        txt=short_text,
                         font="DejaVu-Sans",
-                        font_size=30,
+                        fontsize=30,
                         color='white',
                         stroke_color='black',
                         stroke_width=2,
                         method='label'
                     )
-                    txt_clip = txt_clip.with_position(('center', 'bottom')).with_duration(audio_clip.duration)
+                    txt_clip = txt_clip.set_position(('center', 'bottom')).set_duration(audio_clip.duration)
                     image_clip = CompositeVideoClip([image_clip, txt_clip])
             except Exception as sub_e:
                 logger.warning(f"Failed to add subtitle for page {narration.get('page')}, skipping: {sub_e}")
                 
-            image_clip = image_clip.with_audio(audio_clip)
+            image_clip = image_clip.set_audio(audio_clip)
             
             # --- Try Adding Transitions ---
             try:
