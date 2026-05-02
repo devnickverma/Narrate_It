@@ -1,7 +1,7 @@
 import os
 import tempfile
-from moviepy import ImageClip, AudioFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
-from moviepy.video.fx import CrossFadeIn
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
+
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -51,7 +51,7 @@ def generate_video(narrations: list, user_id: str) -> str:
             # --- Try Adding Transitions ---
             try:
                 if len(clips) > 0:
-                    image_clip = image_clip.with_effects([CrossFadeIn(0.5)])
+                    image_clip = image_clip.crossfadein(0.5)
             except Exception as fade_e:
                 logger.warning(f"Failed to add crossfade for page {narration.get('page')}, skipping: {fade_e}")
             
