@@ -24,7 +24,7 @@ def generate_video(narrations: list, user_id: str) -> str:
             audio_clip = AudioFileClip(audio_path)
             
             # Create an image clip matching the duration of the audio
-            image_clip = ImageClip(image_path).with_duration(audio_clip.duration)
+            image_clip = ImageClip(image_path).set_duration(audio_clip.duration)
             
             # --- Try Adding Subtitles ---
             try:
