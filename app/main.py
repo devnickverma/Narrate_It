@@ -33,10 +33,19 @@ def inject_custom_css():
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         /* ── Reset & Global Text Overlap Fix ── */
-        * { 
-            font-family: 'Inter', sans-serif !important; 
-            line-height: 1.5 !important; 
-            word-wrap: break-word !important; 
+        p, span, div, li, h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Inter', sans-serif;
+            word-wrap: break-word;
+        }
+
+        /* ── Final Output Video Size ── */
+        video {
+            width: 150px !important;
+            height: 200px !important;
+            object-fit: cover !important;
+            border-radius: 8px;
+            display: block;
+            margin: auto;
         }
 
         .stApp { background-color: #0B0F19; }
@@ -172,13 +181,7 @@ def inject_custom_css():
             border: 1px solid #334155;
         }
 
-        /* ── File Uploader Clean ── */
-        [data-testid="stFileUploader"] {
-            background-color: #111827;
-            border: 1px solid #1E293B;
-            border-radius: 8px;
-            padding: 12px;
-        }
+
 
         /* ── Select & Slider ── */
         .stSelectbox label, .stSlider label {
@@ -354,36 +357,40 @@ def show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_spe
     if not sel_page:
         return
         
-    st.image(sel_page['image_path'], use_container_width=True)
+    pop_left, pop_right = st.columns([1, 1])
     
-    page_nar = next((n for n in narrations if n["page"] == pn), None)
-    has_audio = pn in st.session_state.get("audio_map", {})
+    with pop_left:
+        st.image(sel_page['image_path'], use_container_width=True)
+    
+    with pop_right:
+        page_nar = next((n for n in narrations if n["page"] == pn), None)
+        has_audio = pn in st.session_state.get("audio_map", {})
 
-    if page_nar:
-        st.text_area("Narration Script", page_nar["text"], height=140, disabled=True, key=f"popup_script_{pn}")
-        if has_audio:
-            st.audio(st.session_state["audio_map"][pn])
+        if page_nar:
+            st.text_area("Narration Script", page_nar["text"], height=200, disabled=True, key=f"popup_script_{pn}")
+            if has_audio:
+                st.audio(st.session_state["audio_map"][pn])
+            else:
+                if st.button("Generate Audio", key=f"popup_pa_{pn}", use_container_width=True):
+                    with st.spinner("Generating..."):
+                        try:
+                            ap = generate_audio(text=page_nar["text"], user_id=user_id, page=pn, voice_model=selected_voice, speed=selected_speed)
+                            st.session_state["audio_map"][pn] = ap
+                            st.rerun()
+                        except Exception as e:
+                            logger.error("Audio gen failed", exc_info=True)
+                            st.error(str(e))
         else:
-            if st.button("Generate Audio", key=f"popup_pa_{pn}", use_container_width=True):
+            if st.button("Generate Narration", key=f"popup_pn_{pn}", use_container_width=True):
                 with st.spinner("Generating..."):
                     try:
-                        ap = generate_audio(text=page_nar["text"], user_id=user_id, page=pn, voice_model=selected_voice, speed=selected_speed)
-                        st.session_state["audio_map"][pn] = ap
+                        result = generate_narration(page_text=sel_page['text'], context=None, user_id=user_id, image_path=sel_page['image_path'])
+                        st.session_state["narrations"] = [n for n in st.session_state.get("narrations", []) if n["page"] != pn]
+                        st.session_state["narrations"].append({"page": pn, "text": result, "image_path": sel_page['image_path']})
                         st.rerun()
                     except Exception as e:
-                        logger.error("Audio gen failed", exc_info=True)
+                        logger.error("Narration gen failed", exc_info=True)
                         st.error(str(e))
-    else:
-        if st.button("Generate Narration", key=f"popup_pn_{pn}", use_container_width=True):
-            with st.spinner("Generating..."):
-                try:
-                    result = generate_narration(page_text=sel_page['text'], context=None, user_id=user_id, image_path=sel_page['image_path'])
-                    st.session_state["narrations"] = [n for n in st.session_state.get("narrations", []) if n["page"] != pn]
-                    st.session_state["narrations"].append({"page": pn, "text": result, "image_path": sel_page['image_path']})
-                    st.rerun()
-                except Exception as e:
-                    logger.error("Narration gen failed", exc_info=True)
-                    st.error(str(e))
 
 # ─────────────────────────────────────────────
 # DASHBOARD
@@ -525,14 +532,16 @@ def render_dashboard(user_id):
             flex-wrap: nowrap !important;
             overflow-x: auto !important;
             padding-bottom: 12px;
-            gap: 4px !important;
+            gap: 2px !important;
             justify-content: flex-start !important;
         }
         .page-row-marker + div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-            min-width: 44px !important;
-            max-width: 44px !important;
-            flex: 0 0 44px !important;
-            width: 44px !important;
+            min-width: 38px !important;
+            max-width: 38px !important;
+            flex: 0 0 38px !important;
+            width: 38px !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
         .page-row-marker + div[data-testid="stHorizontalBlock"] button {
             height: 36px !important;
