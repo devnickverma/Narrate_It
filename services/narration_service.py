@@ -77,12 +77,14 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
         common_instructions = (
             "CRITICAL INSTRUCTIONS for Voiceover Script:\n"
             "- Output must feel like a natural, human documentary narration or video voiceover. Not a chatbot.\n"
-            "- Limit output to 4-8 sentences per page.\n"
+            "- Limit output to 4-8 sentences max per page. Keep concise, avoid rambling.\n"
             "- DO NOT use conversational filler like 'Hello', 'Today we are going to', 'Let's break down', 'Do you have any questions?', or 'Would you like me to...'\n"
             "- Avoid long paragraphs. Keep sentences clear, direct, and medium-length.\n"
             "- Do not over-explain, add extra examples, or repeat yourself.\n"
             "- Focus ONLY on key ideas, main actions, and essential context.\n"
-            "- ADD HUMAN SPEECH LAYER: Vary sentence rhythm. Use '...' for natural thinking or dramatic pauses. Use '.' for short pauses. Use occasional conversational fillers (e.g., 'um', 'uh', 'hmm') ONLY when natural for the specific tone, but DO NOT over-insert them. Focus on subtle realism.\n"
+            "- ADD HUMAN SPEECH LAYER: Maintain cinematic storytelling tone and use '...' for natural thinking or dramatic pauses.\n"
+            "- SUBTLE HUMANIZATION: You may introduce light hesitation or fillers ('wait...', 'okay...', 'uh...', 'hmm...') ONLY when natural.\n"
+            "- STRICT CONSTRAINT: Use conversational fillers VERY sparingly (max 1-2 per entire narration). Do not spam fillers or over-dramatize. Keep it grounded and believable.\n"
         )
         
         if content_type == "visual":
@@ -91,11 +93,10 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
                 f"{common_instructions}\n"
                 "Specific Rules:\n"
                 "* Use an expressive, dramatic, and storytelling tone.\n"
-                "* Add natural reactions (e.g., 'oh...', 'wait...', 'what just happened?').\n"
+                "* Add slight hesitation and natural reactions (e.g., 'Wait... something feels off here.', 'Oh... okay... now that’s interesting.').\n"
                 "* Include tension pauses ('...') and emotional emphasis.\n"
                 "* Describe the main scene only and include key dialogue if visible.\n"
-                "* Avoid excessive detail.\n"
-                "* Example style: 'This changes everything... wait... is that really him?'"
+                "* Avoid excessive detail."
             )
         elif content_type == "presentation":
             base_prompt = (
@@ -106,6 +107,7 @@ def generate_narration(page_text: str, context: list[str] | None, user_id: str, 
                 "* Use an energetic and engaging tone.\n"
                 "* Add light emphasis and structured pauses for clarity.\n"
                 "* Highlight the top 3-5 key points.\n"
+                "* Minimal to zero filler words.\n"
                 "* Avoid long explanations."
             )
         else:

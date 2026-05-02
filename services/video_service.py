@@ -34,7 +34,7 @@ def generate_video(narrations: list, user_id: str) -> str:
                     short_text = subtitle_text[:120] + "..." if len(subtitle_text) > 120 else subtitle_text
                     txt_clip = TextClip(
                         text=short_text,
-                        font="Arial",
+                        font="DejaVu-Sans",
                         font_size=30,
                         color='white',
                         stroke_color='black',
