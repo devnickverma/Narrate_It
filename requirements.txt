@@ -6,4 +6,4 @@ PyMuPDF
 google-genai
 Pillow
 deepgram-sdk
-moviepy
+moviepy==1.0.3
