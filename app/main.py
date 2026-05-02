@@ -48,20 +48,54 @@ def inject_custom_css():
             margin: auto;
         }
 
-        /* ── Wider Popup Dialog ── */
+        /* ── Popup Dialog ── */
+        [data-testid="stDialog"] {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
         [data-testid="stDialog"] > div {
             max-width: 800px !important;
             width: 800px !important;
+            margin: auto !important;
+            transform: none !important;
         }
 
-        /* ── Strip inner vertical-block padding inside page columns ── */
-        .page-row-marker + div[data-testid="stHorizontalBlock"] [data-testid="stVerticalBlockBorderWrapper"] {
+        /* ── Page Row (single system) ── */
+        .page-row [data-testid="stHorizontalBlock"] {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            gap: 2px !important;
+            align-items: center !important;
+            overflow-x: auto !important;
+            justify-content: flex-start !important;
+        }
+        .page-row [data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            min-width: 38px !important;
+            max-width: 38px !important;
+            flex: 0 0 38px !important;
+            width: 38px !important;
             padding: 0 !important;
             margin: 0 !important;
         }
-        .page-row-marker + div[data-testid="stHorizontalBlock"] [data-testid="stVerticalBlock"] {
+        .page-row [data-testid="stVerticalBlockBorderWrapper"] {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .page-row [data-testid="stVerticalBlock"] {
             gap: 0 !important;
             padding: 0 !important;
+        }
+        .page-row button {
+            width: 38px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font-size: 0.7rem !important;
+            border-radius: 6px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
         }
 
         .stApp { background-color: #0B0F19; }
@@ -463,8 +497,11 @@ def render_dashboard(user_id):
     pages = st.session_state["pages"]
     narrations = get_all_narrations()
 
-    # ── Row 2: Action toolbar ──
+    # ── Row 2: Action toolbar + status indicators ──
     a1, a2, a3 = st.columns(3)
+    nar_count = len(st.session_state.get("narrations", []))
+    aud_count = len(st.session_state.get("audio_map", {}))
+    total = len(pages)
     with a1:
         if st.button("Generate All Narrations", use_container_width=True):
             bar = st.progress(0)
@@ -486,6 +523,12 @@ def render_dashboard(user_id):
                 time.sleep(1)
             txt.text("Done.")
             st.rerun()
+        if nar_count >= total:
+            st.markdown("<p style='font-size:0.7rem;color:#22C55E;margin:2px 0 0;'>✓ All narrations done</p>", unsafe_allow_html=True)
+        elif nar_count > 0:
+            st.markdown(f"<p style='font-size:0.7rem;color:#D97706;margin:2px 0 0;'>{nar_count}/{total} narrated</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='font-size:0.7rem;color:#475569;margin:2px 0 0;'>Not started</p>", unsafe_allow_html=True)
 
     with a2:
         if st.button("Generate All Audio", use_container_width=True):
@@ -511,6 +554,12 @@ def render_dashboard(user_id):
                     time.sleep(1)
                 txt.text("Done.")
                 st.rerun()
+        if aud_count >= total:
+            st.markdown("<p style='font-size:0.7rem;color:#22C55E;margin:2px 0 0;'>✓ All audio done</p>", unsafe_allow_html=True)
+        elif aud_count > 0:
+            st.markdown(f"<p style='font-size:0.7rem;color:#D97706;margin:2px 0 0;'>{aud_count}/{total} audio ready</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='font-size:0.7rem;color:#475569;margin:2px 0 0;'>Not started</p>", unsafe_allow_html=True)
 
     with a3:
         if st.button("Generate Video", use_container_width=True):
@@ -533,79 +582,48 @@ def render_dashboard(user_id):
                     except Exception as e:
                         logger.error("Video generation failed", exc_info=True)
                         st.error(f"Error: {str(e)}")
+        if st.session_state.get("video_file"):
+            st.markdown("<p style='font-size:0.7rem;color:#22C55E;margin:2px 0 0;'>✓ Video ready</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='font-size:0.7rem;color:#475569;margin:2px 0 0;'>Not rendered</p>", unsafe_allow_html=True)
 
-    # ── Row 3: Page buttons (left) + Final output (right) ── SAME ROW ──
+    # ── Row 3: Page buttons (left) + Final output (right) ── ALWAYS 2-COL ──
     st.markdown("<hr style='margin:8px 0; border-color:#1E293B;'>", unsafe_allow_html=True)
 
-    has_video = st.session_state.get("video_file")
-    if has_video:
-        row_left, row_right = st.columns([3, 1])
-    else:
-        row_left = st.container()
-        row_right = None
+    row_left, row_right = st.columns([3, 1])
 
     with row_left:
-        st.markdown('<div class="page-row-marker"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="page-row">', unsafe_allow_html=True)
 
-        css_rules = []
-        css_rules.append("""
-            .page-row-marker + div[data-testid="stHorizontalBlock"] {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                padding-bottom: 4px;
-                gap: 2px !important;
-                justify-content: flex-start !important;
-            }
-            .page-row-marker + div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-                min-width: 38px !important;
-                max-width: 38px !important;
-                flex: 0 0 38px !important;
-                width: 38px !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .page-row-marker + div[data-testid="stHorizontalBlock"] button {
-                height: 36px !important;
-                padding: 0 !important;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 6px !important;
-            }
-        """)
-
-        cols = st.columns(len(pages))
+        # Per-button color injection
+        btn_css = []
         for idx, page in enumerate(pages):
             pn = page['page_number']
             has_nar = any(n["page"] == pn for n in narrations)
             has_aud = pn in st.session_state["audio_map"]
 
-            bg_color = "#1E293B"
-            text_color = "#94A3B8"
-            border_color = "#334155"
-
             if has_aud:
-                bg_color = "#059669"
-                text_color = "#FFFFFF"
-                border_color = "#047857"
+                bg, fg, bdr = "#059669", "#FFFFFF", "#047857"
             elif has_nar:
-                bg_color = "#D97706"
-                text_color = "#FFFFFF"
-                border_color = "#B45309"
+                bg, fg, bdr = "#D97706", "#FFFFFF", "#B45309"
+            else:
+                bg, fg, bdr = "#1E293B", "#94A3B8", "#334155"
 
-            css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button {{ background-color: {bg_color} !important; color: {text_color} !important; border: 2px solid {border_color} !important; }}")
-            css_rules.append(f".page-row-marker + div > div:nth-child({idx+1}) button p {{ color: {text_color} !important; font-weight: 700 !important; }}")
+            btn_css.append(f".page-row [data-testid='stHorizontalBlock'] > div:nth-child({idx+1}) button {{ background-color: {bg} !important; color: {fg} !important; border: 2px solid {bdr} !important; }}")
+            btn_css.append(f".page-row [data-testid='stHorizontalBlock'] > div:nth-child({idx+1}) button p {{ color: {fg} !important; font-weight: 700 !important; }}")
 
+        cols = st.columns(len(pages))
+        for idx, page in enumerate(pages):
+            pn = page['page_number']
             with cols[idx]:
                 if st.button(f"P{pn}", key=f"pill_{pn}"):
                     show_page_popup(pn, pages, narrations, user_id, selected_voice, selected_speed)
 
-        st.markdown(f"<style>{''.join(css_rules)}</style>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f"<style>{''.join(btn_css)}</style>", unsafe_allow_html=True)
 
-    if row_right is not None:
-        with row_right:
+    with row_right:
+        if st.session_state.get("video_file"):
             st.markdown("<p style='font-size:0.75rem; color:#64748B; text-align:center; margin-bottom:4px;'>Final Output</p>", unsafe_allow_html=True)
             st.video(st.session_state["video_file"])
             try:
