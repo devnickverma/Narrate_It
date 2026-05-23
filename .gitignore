@@ -8,3 +8,6 @@
 .Implementation_plan.md
 
 .streamlit/secrets.toml
+
+app/__pycache__
+app/token_bridge

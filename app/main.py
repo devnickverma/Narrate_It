@@ -6,7 +6,7 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
-from services.auth_service import login_with_google, handle_oauth_callback, get_current_user, logout
+from services.auth_service import login_with_google, handle_oauth_callback, get_current_user, logout, send_otp_code, verify_otp_code
 from services.key_service import save_api_keys, has_api_keys
 from services.pdf_service import upload_pdf, download_pdf, split_pdf_to_pages
 from services.narration_service import generate_narration
@@ -343,6 +343,67 @@ def render_landing_page():
             login_with_google()
         st.markdown('</div>', unsafe_allow_html=True)
 
+        st.markdown('<div style="text-align: center; margin: 16px 0 8px 0; color: #475569; font-size: 0.85rem; font-weight: 600;">─ OR ─</div>', unsafe_allow_html=True)
+
+        # Email OTP login panel
+        with st.container():
+            if not st.session_state["otp_sent"]:
+                # Email input
+                email_input = st.text_input("Email Address", placeholder="you@example.com", key="otp_email_input", label_visibility="collapsed")
+                
+                # Check cooldown remaining
+                import time
+                current_time = time.time()
+                last_send = st.session_state.get("otp_send_time", 0.0)
+                cooldown_dur = 60.0
+                elapsed = current_time - last_send
+                remaining = int(cooldown_dur - elapsed)
+                
+                if remaining > 0:
+                    st.button(f"Resend Code in {remaining}s", disabled=True, use_container_width=True)
+                    st.markdown(f"<p style='font-size:0.75rem; color:#64748B; text-align:center; margin-top:4px;'>Please wait {remaining}s before requesting a new code.</p>", unsafe_allow_html=True)
+                else:
+                    if st.button("Send Login Code", use_container_width=True):
+                        if not email_input.strip():
+                            st.error("Please enter a valid email address.")
+                        else:
+                            with st.spinner("Sending code..."):
+                                success, msg = send_otp_code(email_input.strip())
+                                if success:
+                                    st.session_state["otp_email"] = email_input.strip()
+                                    st.session_state["otp_sent"] = True
+                                    st.session_state["otp_send_time"] = time.time()
+                                    st.success(msg)
+                                    st.rerun()
+                                else:
+                                    st.error(msg)
+            else:
+                st.markdown(f"<p style='font-size:0.85rem; color:#94A3B8; text-align:center; margin-bottom:8px;'>Code sent to <b>{st.session_state['otp_email']}</b></p>", unsafe_allow_html=True)
+                otp_code = st.text_input("Enter 6-digit Code", placeholder="123456", key="otp_code_input", label_visibility="collapsed")
+                
+                v_col, c_col = st.columns(2)
+                with v_col:
+                    if st.button("Verify Code", use_container_width=True):
+                        if not otp_code.strip():
+                            st.error("Please enter the verification code.")
+                        else:
+                            with st.spinner("Verifying..."):
+                                success, msg = verify_otp_code(st.session_state["otp_email"], otp_code.strip())
+                                if success:
+                                    # Clear state variables on success
+                                    st.session_state["otp_email"] = ""
+                                    st.session_state["otp_sent"] = False
+                                    st.session_state["otp_send_time"] = 0.0
+                                    st.success(msg)
+                                    st.rerun()
+                                else:
+                                    st.error(msg)
+                with c_col:
+                    if st.button("Cancel / Back", use_container_width=True):
+                        st.session_state["otp_sent"] = False
+                        st.session_state["otp_email"] = ""
+                        st.rerun()
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     f1, f2, f3 = st.columns(3)
@@ -662,17 +723,111 @@ def render_dashboard(user_id):
 # MAIN
 # ─────────────────────────────────────────────
 def main():
-    for key, default in [("pages", []), ("narrations", []), ("audio_map", {}), ("video_file", None), ("video_url", None), ("selected_page", None), ("current_pdf", None)]:
+    logger.debug(f"[DEBUG-AUTH] App startup. st.query_params: {st.query_params.to_dict() if hasattr(st.query_params, 'to_dict') else st.query_params}")
+    # Initialize state variables
+    for key, default in [("pages", []), ("narrations", []), ("audio_map", {}), ("video_file", None), ("video_url", None), ("selected_page", None), ("current_pdf", None), ("otp_email", ""), ("otp_sent", False), ("otp_send_time", 0.0), ("auth_restored", False)]:
         if key not in st.session_state:
             st.session_state[key] = default
+
+    # STEP 2 — CREATE LOCAL STORAGE TOKEN BRIDGE
+    import streamlit.components.v1 as components
+    if not st.session_state.get("auth_restored"):
+        components.html(
+            """<script>
+            try {
+                const hash = window.parent.location.hash;
+                if (hash && hash.includes("access_token=")) {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const accessToken = params.get("access_token");
+                    const refreshToken = params.get("refresh_token");
+                    if (accessToken && refreshToken) {
+                        localStorage.setItem("supabase_access_token", accessToken);
+                        localStorage.setItem("supabase_refresh_token", refreshToken);
+                        // remove hash from URL cleanly
+                        window.parent.history.replaceState(
+                            {},
+                            document.title,
+                            window.parent.location.pathname
+                        );
+                    }
+                }
+            } catch (e) {
+                console.error("Token bridge failed:", e);
+            }
+            </script>""",
+            height=0,
+            width=0
+        )
+
+        # STEP 3 — ADD TOKEN RECOVERY COMPONENT
+        import os
+        bridge_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token_bridge")
+        token_bridge = components.declare_component("token_bridge", path=bridge_dir)
+        token_data = token_bridge(key="token_bridge_component")
+
+        # STEP 3 — ADD HARD DEBUG OUTPUT IN PYTHON
+        st.write("DEBUG TOKEN DATA:", token_data)
+        logger.info(f"DEBUG TOKEN DATA: {token_data}")
+
+        # STEP 4 — ONLY RUN SESSION RESTORE IF TOKEN EXISTS
+        if token_data and isinstance(token_data, dict) and token_data.get("access_token"):
+            access_token = token_data.get("access_token")
+            refresh_token = token_data.get("refresh_token")
+            
+            logger.debug("[DEBUG-AUTH] TOKEN DATA RECEIVED")
+            logger.debug("[DEBUG-AUTH] ATTEMPTING SET_SESSION")
+            try:
+                from services.supabase_client import get_supabase_client
+                supabase = get_supabase_client()
+                res = supabase.auth.set_session(access_token, refresh_token)
+                
+                # Check actual returned structure (handle res.user and res.session.user)
+                logger.debug(f"[DEBUG-AUTH] set_session returned: {res}")
+                
+                user_obj = None
+                if res:
+                    if hasattr(res, "user") and res.user:
+                        user_obj = res.user
+                        logger.debug(f"[DEBUG-AUTH] Found res.user: {res.user}")
+                    elif hasattr(res, "session") and res.session and hasattr(res.session, "user") and res.session.user:
+                        user_obj = res.session.user
+                        logger.debug(f"[DEBUG-AUTH] Found res.session.user fallback: {res.session.user}")
+                
+                if user_obj:
+                    st.session_state["user"] = user_obj
+                    st.session_state["auth_restored"] = True
+                    logger.debug(f"[DEBUG-AUTH] st.session_state keys after assignment: {list(st.session_state.keys())}")
+                    logger.debug(f"[DEBUG-AUTH] USER RESTORED: {user_obj.email}")
+                    
+                    # STEP 5 — ADD LOCALSTORAGE CLEANUP
+                    components.html(
+                        """<script>
+                        try {
+                            localStorage.removeItem("supabase_access_token");
+                            localStorage.removeItem("supabase_refresh_token");
+                        } catch (e) {
+                            console.error("Token bridge cleanup failed:", e);
+                        }
+                        </script>""",
+                        height=0,
+                    )
+                    
+                    logger.info("AUTH RESTORE SUCCESSFUL — ENTERING DASHBOARD")
+                    st.rerun()
+                else:
+                    logger.error("[DEBUG-AUTH] set_session finished but no valid user found in result.")
+            except Exception as e:
+                logger.error("[DEBUG-AUTH] Exception occurred in localStorage set_session", exc_info=True)
 
     inject_custom_css()
     handle_oauth_callback()
     user = get_current_user()
 
     if user is None:
+        logger.debug("[DEBUG-AUTH] Branch rendered: LANDING PAGE")
         render_landing_page()
     else:
+        logger.debug(f"[DEBUG-AUTH] Branch rendered: DASHBOARD for user: {user.email}")
         st.sidebar.markdown(f"**{user.email}**")
         st.sidebar.markdown("---")
         nav = st.sidebar.radio("Nav", ["Dashboard", "Settings"], label_visibility="collapsed")
