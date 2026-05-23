@@ -12,7 +12,7 @@ from services.pdf_service import upload_pdf, download_pdf, split_pdf_to_pages
 from services.narration_service import generate_narration
 from services.tts_service import generate_audio
 from services.video_service import generate_video
-from utils.logger import get_logger
+from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -723,16 +723,14 @@ def render_dashboard(user_id):
 # MAIN
 # ─────────────────────────────────────────────
 def main():
-    logger.debug(f"[DEBUG-AUTH] App startup. st.query_params: {st.query_params.to_dict() if hasattr(st.query_params, 'to_dict') else st.query_params}")
     # Initialize state variables
     for key, default in [("pages", []), ("narrations", []), ("audio_map", {}), ("video_file", None), ("video_url", None), ("selected_page", None), ("current_pdf", None), ("otp_email", ""), ("otp_sent", False), ("otp_send_time", 0.0), ("auth_restored", False)]:
         if key not in st.session_state:
             st.session_state[key] = default
 
     # STEP 2 — CREATE LOCAL STORAGE TOKEN BRIDGE
-    import streamlit.components.v1 as components
     if not st.session_state.get("auth_restored"):
-        components.html(
+        st.iframe(
             """<script>
             try {
                 const hash = window.parent.location.hash;
@@ -755,52 +753,40 @@ def main():
                 console.error("Token bridge failed:", e);
             }
             </script>""",
-            height=0,
-            width=0
+            height=1
         )
 
         # STEP 3 — ADD TOKEN RECOVERY COMPONENT
         import os
+        import streamlit.components.v1 as components
         bridge_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token_bridge")
         token_bridge = components.declare_component("token_bridge", path=bridge_dir)
         token_data = token_bridge(key="token_bridge_component")
-
-        # STEP 3 — ADD HARD DEBUG OUTPUT IN PYTHON
-        st.write("DEBUG TOKEN DATA:", token_data)
-        logger.info(f"DEBUG TOKEN DATA: {token_data}")
 
         # STEP 4 — ONLY RUN SESSION RESTORE IF TOKEN EXISTS
         if token_data and isinstance(token_data, dict) and token_data.get("access_token"):
             access_token = token_data.get("access_token")
             refresh_token = token_data.get("refresh_token")
             
-            logger.debug("[DEBUG-AUTH] TOKEN DATA RECEIVED")
-            logger.debug("[DEBUG-AUTH] ATTEMPTING SET_SESSION")
             try:
                 from services.supabase_client import get_supabase_client
                 supabase = get_supabase_client()
                 res = supabase.auth.set_session(access_token, refresh_token)
                 
-                # Check actual returned structure (handle res.user and res.session.user)
-                logger.debug(f"[DEBUG-AUTH] set_session returned: {res}")
-                
                 user_obj = None
                 if res:
                     if hasattr(res, "user") and res.user:
                         user_obj = res.user
-                        logger.debug(f"[DEBUG-AUTH] Found res.user: {res.user}")
                     elif hasattr(res, "session") and res.session and hasattr(res.session, "user") and res.session.user:
                         user_obj = res.session.user
-                        logger.debug(f"[DEBUG-AUTH] Found res.session.user fallback: {res.session.user}")
                 
                 if user_obj:
                     st.session_state["user"] = user_obj
                     st.session_state["auth_restored"] = True
-                    logger.debug(f"[DEBUG-AUTH] st.session_state keys after assignment: {list(st.session_state.keys())}")
-                    logger.debug(f"[DEBUG-AUTH] USER RESTORED: {user_obj.email}")
+                    logger.info(f"Successfully authenticated user via token callback: {user_obj.email}")
                     
                     # STEP 5 — ADD LOCALSTORAGE CLEANUP
-                    components.html(
+                    st.iframe(
                         """<script>
                         try {
                             localStorage.removeItem("supabase_access_token");
@@ -809,25 +795,22 @@ def main():
                             console.error("Token bridge cleanup failed:", e);
                         }
                         </script>""",
-                        height=0,
+                        height=1
                     )
                     
-                    logger.info("AUTH RESTORE SUCCESSFUL — ENTERING DASHBOARD")
                     st.rerun()
                 else:
-                    logger.error("[DEBUG-AUTH] set_session finished but no valid user found in result.")
+                    logger.error("set_session finished but no valid user found in result.")
             except Exception as e:
-                logger.error("[DEBUG-AUTH] Exception occurred in localStorage set_session", exc_info=True)
+                logger.error("Exception occurred in localStorage set_session", exc_info=True)
 
     inject_custom_css()
     handle_oauth_callback()
     user = get_current_user()
 
     if user is None:
-        logger.debug("[DEBUG-AUTH] Branch rendered: LANDING PAGE")
         render_landing_page()
     else:
-        logger.debug(f"[DEBUG-AUTH] Branch rendered: DASHBOARD for user: {user.email}")
         st.sidebar.markdown(f"**{user.email}**")
         st.sidebar.markdown("---")
         nav = st.sidebar.radio("Nav", ["Dashboard", "Settings"], label_visibility="collapsed")

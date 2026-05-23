@@ -1,10 +1,10 @@
 import base64
 import os
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from utils.config import Config
+from backend.config.settings import settings
 
 def _get_key() -> bytes:
-    key_str = Config.ENCRYPTION_KEY
+    key_str = settings.ENCRYPTION_KEY
     if not key_str:
         raise ValueError("ENCRYPTION_KEY is not set in the environment")
     

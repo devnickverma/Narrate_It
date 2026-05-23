@@ -1,12 +1,2 @@
-from supabase import create_client, Client
-from utils.config import Config
-
-_supabase: Client | None = None
-
-def get_supabase_client() -> Client:
-    """Initialize and return a singleton Supabase client."""
-    global _supabase
-    if _supabase is None:
-        Config.validate()
-        _supabase = create_client(Config.SUPABASE_URL, Config.SUPABASE_ANON_KEY)
-    return _supabase
+# Legacy compatibility wrapper proxying to the single-source-of-truth backend services
+from backend.services.supabase_client import get_supabase_client
