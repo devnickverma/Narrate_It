@@ -43,11 +43,11 @@ def detect_content_type(page_text: str, image) -> str:
     # Safety fallback
     return "text"
 
-def generate_narration(page_text: str, context: list[str] | None, user_id: str, image_path: str = None) -> str:
+def generate_narration(page_text: str, context: list[str] | None, user_id: str, image_path: str = None, jwt_token: str = None) -> str:
     """Generates a narration script for a given PDF page text and image using Gemini."""
     logger.info(f"Generating narration for user {user_id}")
     
-    keys = get_api_keys(user_id)
+    keys = get_api_keys(user_id, jwt_token)
     gemini_api_key = keys.get("gemini_key")
     
     if not gemini_api_key:

@@ -6,11 +6,11 @@ from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-def generate_audio(text: str, user_id: str, page: int, voice_model: str = "aura-asteria-en", speed: float = 1.0) -> str:
+def generate_audio(text: str, user_id: str, page: int, voice_model: str = "aura-asteria-en", speed: float = 1.0, jwt_token: str = None) -> str:
     """Generates audio for narration text using Deepgram."""
     logger.info(f"Generating audio for page {page} with voice {voice_model} and speed {speed}")
     
-    keys = get_api_keys(user_id)
+    keys = get_api_keys(user_id, jwt_token)
     deepgram_key = keys.get("deepgram_key")
     
     if not deepgram_key:
@@ -27,9 +27,16 @@ def generate_audio(text: str, user_id: str, page: int, voice_model: str = "aura-
         
         # Call the API
         try:
+            # Map playback speed values safely (0.25 to 4.0)
+            speaking_rate = float(speed)
+            if speaking_rate < 0.25:
+                speaking_rate = 0.25
+            elif speaking_rate > 4.0:
+                speaking_rate = 4.0
+
             kwargs = {"text": text, "model": voice_model}
-            if speed != 1.0:
-                kwargs["speed"] = speed
+            if speaking_rate != 1.0:
+                kwargs["speaking_rate"] = speaking_rate
                 
             response = deepgram.speak.v1.audio.generate(**kwargs)
             
@@ -39,8 +46,7 @@ def generate_audio(text: str, user_id: str, page: int, voice_model: str = "aura-
                     
         except Exception as e:
             if speed != 1.0:
-                logger.warning("Deepgram failed with speed parameter, falling back to default speed.")
-                # Fallback without speed
+                # Fallback silently without speed/speaking_rate
                 response = deepgram.speak.v1.audio.generate(text=text, model=voice_model)
                 with open(temp_file.name, "wb") as audio_file:
                     for chunk in response:

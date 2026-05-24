@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Workspace management dashboard to upload PDF documents, choose TTS voices, customize reading speed, and render voiceover video histories.">
+    <title>NarrateIt Workspace — Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-brand">
+                    <span class="sidebar-icon">🎬</span>
+                    <span class="sidebar-title">NarrateIt</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item active" aria-current="page">
+                        <span>📊</span> Workspace Dashboard
+                    </a>
+                    <a href="#" class="nav-item" id="settings-nav-btn">
+                        <span>⚙️</span> API Settings
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="sidebar-user">
+                <div class="user-info">
+                    <span class="user-email" id="user-email">active_user@narrate.it</span>
+                    <span class="user-role">SaaS Core Workspace</span>
+                </div>
+                <button onclick="logout()" class="btn btn-logout">
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            
+            <header class="dashboard-header">
+                <h1 class="dashboard-title">Workspace Dashboard</h1>
+                <p class="dashboard-subtitle">Upload your PDF documents and render narration voiceovers in seconds.</p>
+            </header>
+
+            <div class="workspace-grid">
+                
+                <!-- PDF Upload Workspace Panel -->
+                <section class="panel-card glass">
+                    <div class="panel-header">
+                        <span class="panel-icon">📂</span>
+                        <h2 class="panel-title">Document Upload</h2>
+                    </div>
+
+                    <!-- Interactive Dragzone Drop Zone -->
+                    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload PDF Area">
+                        <span class="dropzone-icon">📥</span>
+                        <div class="dropzone-text">
+                            Drag & drop your PDF file here, or <strong>browse files</strong>
+                        </div>
+                        <input type="file" id="file-input" class="hidden" accept=".pdf">
+                    </div>
+
+                    <!-- Uploaded Metadata Preview info badge -->
+                    <div class="file-info-badge hidden" id="file-selected-info">
+                        <span class="file-icon">📄</span>
+                        <div class="file-details">
+                            <span class="filename" id="filename-label">document.pdf</span>
+                            <span class="file-pages" id="pages-count-label">Checking pages...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Generation Pipeline Mappings Configurations -->
+                <section class="panel-card glass">
+                    <div class="panel-header">
+                        <span class="panel-icon">⚙️</span>
+                        <h2 class="panel-title">Video Options</h2>
+                    </div>
+
+                    <div class="config-grid">
+                        
+                        <!-- Voice models options selection -->
+                        <div class="input-group">
+                            <label for="voice-select" class="input-label">TTS Narration Voice</label>
+                            <select id="voice-select" class="input-field">
+                                <option value="aura-asteria-en">Asteria (Female - English)</option>
+                                <option value="aura-luna-en">Luna (Female - English)</option>
+                                <option value="aura-stella-en">Stella (Female - English)</option>
+                                <option value="aura-athena-en">Athena (Female - English)</option>
+                                <option value="aura-hera-en">Hera (Female - English)</option>
+                                <option value="aura-orpheus-en">Orpheus (Male - English)</option>
+                                <option value="aura-arcas-en">Arcas (Male - English)</option>
+                                <option value="aura-perseus-en">Perseus (Male - English)</option>
+                            </select>
+                        </div>
+
+                        <!-- Reading speed custom slider adjustments -->
+                        <div class="slider-container">
+                            <div class="slider-labels">
+                                <label for="speed-slider" class="input-label">Reading Speed</label>
+                                <span id="speed-value">1.00x (Normal)</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="speed-slider" 
+                                min="0.75" 
+                                max="1.30" 
+                                step="0.05" 
+                                value="1.00" 
+                                class="custom-slider"
+                            >
+                        </div>
+
+                    </div>
+
+                    <!-- Trigger Generate Button -->
+                    <button class="btn btn-primary" id="generate-btn" disabled>
+                        <span>🎬</span> Render Narration Video
+                    </button>
+
+                    <!-- Progressive Timeline Rendering Track -->
+                    <div class="progress-container hidden" id="pipeline-progress">
+                        <div class="progress-header">
+                            <span id="progress-status-text">Compiling video timelines...</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+
+            <!-- Historical Collections Archives -->
+            <section class="history-section">
+                <header class="section-header">
+                    <h3 class="section-title">Your Generated Video History</h3>
+                </header>
+
+                <div class="video-grid" id="video-history-grid">
+                    
+                    <!-- Empty catalogs fallback placeholder -->
+                    <div class="empty-state" id="empty-history-placeholder">
+                        <span class="empty-state-icon">🎬</span>
+                        <p>No video voiceovers created yet. Start by uploading a PDF above!</p>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-overlay" id="settings-overlay"></div>
+        <div class="modal-container glass">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ API Settings</h3>
+                <button class="btn-close" id="close-settings-btn" aria-label="Close settings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Configure your personal API keys securely. They are stored using industry-standard AES-GCM encryption.</p>
+                
+                <div class="input-group">
+                    <label for="gemini-key-input" class="input-label">Gemini API Key</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="gemini-key-input" class="input-field" placeholder="Enter Gemini API Key">
+                        <button class="toggle-password" type="button" data-input="gemini-key-input" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="deepgram-key-input" class="input-label">Deepgram API Key</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="deepgram-key-input" class="input-field" placeholder="Enter Deepgram API Key">
+                        <button class="toggle-password" type="button" data-input="deepgram-key-input" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-logout" style="background: rgba(255, 255, 255, 0.05); color: #FFF; border: 1px solid var(--border-color);" id="cancel-settings-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-settings-btn">
+                    <span class="btn-text">Save Keys</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts Bootstrapping -->
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

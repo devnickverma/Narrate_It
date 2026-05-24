@@ -2,16 +2,21 @@ import uuid
 import tempfile
 import os
 import fitz  # PyMuPDF
-from backend.services.supabase_client import get_supabase_client
+from backend.services.supabase_client import get_supabase_client, get_authenticated_supabase_client
 from typing import List, Dict, Any
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-def upload_pdf(file_bytes: bytes, user_id: str) -> str:
+def upload_pdf(file_bytes: bytes, user_id: str, jwt_token: str = None) -> str:
     """Uploads a PDF file to Supabase Storage and returns the storage path."""
-    logger.info(f"Starting PDF upload for user {user_id}")
-    supabase = get_supabase_client()
+    if jwt_token:
+        logger.info(f"[UPLOAD] Authenticated upload started for user {user_id}")
+        supabase = get_authenticated_supabase_client(jwt_token)
+        logger.info("[UPLOAD] JWT attached successfully")
+    else:
+        logger.info(f"Starting PDF upload for user {user_id}")
+        supabase = get_supabase_client()
     
     file_uuid = str(uuid.uuid4())
     storage_path = f"{user_id}/{file_uuid}.pdf"
@@ -22,22 +27,37 @@ def upload_pdf(file_bytes: bytes, user_id: str) -> str:
             file=file_bytes,
             file_options={"content-type": "application/pdf"}
         )
-        logger.info(f"Successfully uploaded PDF to {storage_path}")
+        if jwt_token:
+            logger.info("[UPLOAD] Storage upload completed")
+        else:
+            logger.info(f"Successfully uploaded PDF to {storage_path}")
+        
+        logger.info(f"[UPLOAD] Final storage path: {storage_path}")
     except Exception as e:
         logger.error(f"Failed to upload PDF to path {storage_path}", exc_info=True)
         raise Exception(f"Failed to upload PDF: {str(e)}")
         
     return storage_path
 
-def download_pdf(storage_path: str) -> str:
+def download_pdf(storage_path: str, jwt_token: str = None) -> str:
     """Downloads a PDF from Supabase Storage to a temporary file."""
-    logger.info(f"Downloading PDF from {storage_path}")
-    supabase = get_supabase_client()
+    # Clean the storage path to prevent mismatch bugs (strip prepended bucket names or slashes)
+    cleaned_path = storage_path
+    if cleaned_path.startswith("pdfs/"):
+        cleaned_path = cleaned_path[len("pdfs/"):]
+    if cleaned_path.startswith("/"):
+        cleaned_path = cleaned_path.lstrip("/")
+    logger.info(f"[DOWNLOAD] Requested storage path: {storage_path}")
+    
+    if jwt_token:
+        supabase = get_authenticated_supabase_client(jwt_token)
+    else:
+        supabase = get_supabase_client()
     
     try:
-        response = supabase.storage.from_("pdfs").download(storage_path)
+        response = supabase.storage.from_("pdfs").download(cleaned_path)
     except Exception as e:
-        logger.error(f"Failed to download PDF from {storage_path}", exc_info=True)
+        logger.error(f"Failed to download PDF from {cleaned_path}", exc_info=True)
         raise Exception(f"Failed to download PDF: {str(e)}")
         
     # Save to temp file

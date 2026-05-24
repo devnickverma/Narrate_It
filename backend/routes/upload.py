@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+import os
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Request
 from backend.services.pdf_service import upload_pdf, download_pdf, split_pdf_to_pages
 from backend.utils.logger import get_logger
 
@@ -7,10 +8,22 @@ router = APIRouter(prefix="/upload", tags=["upload"])
 
 @router.post("/pdf")
 async def upload_document(
+    request: Request,
     user_id: str = Form(...),
     file: UploadFile = File(...)
 ):
     logger.info(f"Received PDF upload request from user: {user_id}")
+    
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        logger.warning(f"Unauthorized upload attempt for user {user_id}: missing Authorization header")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Authorization header"
+        )
+        
+    jwt_token = auth_header.split(" ")[1]
+    
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -23,11 +36,11 @@ async def upload_document(
         # Read file bytes
         file_bytes = await file.read()
         
-        # Upload to Supabase Storage
-        storage_path = upload_pdf(file_bytes, user_id)
+        # Upload to Supabase Storage using authenticated client
+        storage_path = upload_pdf(file_bytes, user_id, jwt_token)
         
         # Download locally and split into pages
-        local_path = download_pdf(storage_path)
+        local_path = download_pdf(storage_path, jwt_token)
         pages = split_pdf_to_pages(local_path)
         
         return {

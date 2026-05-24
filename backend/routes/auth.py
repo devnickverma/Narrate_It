@@ -27,17 +27,25 @@ async def verify_otp(payload: VerifyOTPRequest):
             detail=str(result)
         )
     
-    # Safely extract user object
+    # Safely extract user object and tokens
     user_obj = None
+    access_token = None
+    refresh_token = None
+    
     if hasattr(result, "user") and result.user:
         user_obj = result.user
-    elif hasattr(result, "session") and result.session and hasattr(result.session, "user") and result.session.user:
-        user_obj = result.session.user
-        
+    if hasattr(result, "session") and result.session:
+        access_token = getattr(result.session, "access_token", None)
+        refresh_token = getattr(result.session, "refresh_token", None)
+        if not user_obj and hasattr(result.session, "user") and result.session.user:
+            user_obj = result.session.user
+            
     email = user_obj.email if user_obj else payload.email
     return {
         "status": "success",
         "message": "Login successful!",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "user": {
             "id": user_obj.id if user_obj else None,
             "email": email

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from backend.config.settings import settings
-from backend.routes import health, auth, upload, generate, history
+from backend.routes import health, auth, upload, generate, history, settings as settings_route
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -20,7 +20,9 @@ origins = [
     "http://localhost:8501", # Legacy Streamlit UI
     "http://127.0.0.1:8501",
     "http://localhost:3000", # Future React/Next.js frontend
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    "http://localhost:5500", # Local static server
+    "http://127.0.0.1:5500"
 ]
 
 app.add_middleware(
@@ -37,6 +39,7 @@ app.include_router(auth.router)
 app.include_router(upload.router)
 app.include_router(generate.router)
 app.include_router(history.router)
+app.include_router(settings_route.router)
 
 @app.on_event("startup")
 async def startup_diagnostics():

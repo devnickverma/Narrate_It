@@ -12,6 +12,7 @@ def generate_video(narrations: list, user_id: str) -> str:
     
     try:
         clips = []
+        imagemagick_missing_warned = False
         for narration in narrations:
             if "image_path" not in narration or "audio_path" not in narration:
                 logger.error(f"Missing image or audio for page {narration.get('page')}")
@@ -32,19 +33,24 @@ def generate_video(narrations: list, user_id: str) -> str:
                 if subtitle_text:
                     # Truncate text just in case to prevent massive overflow, or show key concepts
                     short_text = subtitle_text[:120] + "..." if len(subtitle_text) > 120 else subtitle_text
-                    txt_clip = TextClip(
-                        txt=short_text,
-                        font="DejaVu-Sans",
-                        fontsize=30,
-                        color='white',
-                        stroke_color='black',
-                        stroke_width=2,
-                        method='label'
-                    )
-                    txt_clip = txt_clip.set_position(('center', 'bottom')).set_duration(audio_clip.duration)
-                    image_clip = CompositeVideoClip([image_clip, txt_clip])
-            except Exception as sub_e:
-                logger.warning(f"Failed to add subtitle for page {narration.get('page')}, skipping: {sub_e}")
+                    try:
+                        txt_clip = TextClip(
+                            txt=short_text,
+                            font="DejaVu-Sans",
+                            fontsize=30,
+                            color='white',
+                            stroke_color='black',
+                            stroke_width=2,
+                            method='label'
+                        )
+                        txt_clip = txt_clip.set_position(('center', 'bottom')).set_duration(audio_clip.duration)
+                        image_clip = CompositeVideoClip([image_clip, txt_clip])
+                    except Exception as clip_err:
+                        if not imagemagick_missing_warned:
+                            logger.warning("[SUBTITLES] ImageMagick unavailable, skipping subtitles")
+                            imagemagick_missing_warned = True
+            except Exception:
+                pass
                 
             image_clip = image_clip.set_audio(audio_clip)
             

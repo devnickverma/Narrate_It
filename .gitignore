@@ -1,13 +1,17 @@
 .env
 
-/utils/__pycache__
-/services/__pycache__
+# Python bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-.notes.md
-
-.Implementation_plan.md
-
+# Streamlit/App temporary files
+app/token_bridge
 .streamlit/secrets.toml
 
-app/__pycache__
-app/token_bridge
+# Report and verification files
+*_report.md
+runtime_verification.md
+.notes.md
+.Implementation_plan.md
