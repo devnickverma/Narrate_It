@@ -1,0 +1,106 @@
+/* Responsive Breakpoints and Mobile Adaptations */
+
+/* 1. Tablet Viewports (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .hero-title {
+        font-size: 3.5rem;
+        max-width: 700px;
+    }
+
+    .showcase-content, .showcase-panel.active {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+/* 2. Mobile Viewports (max-width: 768px) */
+@media (max-width: 768px) {
+    section {
+        padding: 60px 0;
+    }
+
+    .navbar-links {
+        display: none; /* Hide navigation links on mobile */
+    }
+
+    .navbar-actions .btn-secondary {
+        display: none; /* Hide secondary sign in on navbar for mobile */
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+        max-width: 100%;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 32px;
+    }
+
+    .hero-upload-area {
+        padding: 30px 20px;
+    }
+
+    .floating-mockups {
+        display: none; /* Hide floating mockup decoration cards on mobile */
+    }
+
+    .showcase-switcher {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .showcase-tab {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .pricing-card {
+        padding: 32px 24px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .modal-container {
+        padding: 30px 20px;
+    }
+}

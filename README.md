@@ -1,3 +1,11 @@
+
+
+Start backend
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+Start frontend
+cd frontend
+python -m http.server 5500
+
 # NarrateIt
 
 **Turn PDFs into Narrated Videos in Seconds.**

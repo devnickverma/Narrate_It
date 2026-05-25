@@ -15,7 +15,13 @@ async def send_otp(payload: SendOTPRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=message
         )
-    return {"status": "success", "message": message}
+    
+    from backend.config.settings import settings
+    return {
+        "status": "success",
+        "message": message,
+        "otp_required": settings.OTP_LOGIN_MODE
+    }
 
 @router.post("/otp/verify")
 async def verify_otp(payload: VerifyOTPRequest):

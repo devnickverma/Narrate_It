@@ -166,19 +166,46 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 if (!isOtpSent) {
                     console.log(`[AUTH] [REQUEST] Requesting OTP code transmission for: ${email}`);
-                    submitBtn.textContent = "Transmitting OTP...";
+                    submitBtn.textContent = "Transmitting...";
                     
                     const response = await sendOtp(email);
                     console.log("[AUTH] [RESPONSE] sendOtp response:", response);
                     
-                    isOtpSent = true;
-                    pendingEmail = email;
-                    emailInput.disabled = true;
-                    otpSection.classList.remove("hidden");
-                    otpInput.required = true;
-                    otpInput.focus();
-                    
-                    startResendCooldown();
+                    if (response && response.otp_required) {
+                        isOtpSent = true;
+                        pendingEmail = email;
+                        emailInput.disabled = true;
+                        otpSection.classList.remove("hidden");
+                        otpInput.required = true;
+                        otpInput.focus();
+                        
+                        startResendCooldown();
+                    } else {
+                        // Magic link mode: Show success state UI!
+                        // Hide login form inputs and Google login elements
+                        const inputGroup = loginForm.querySelector(".input-group:not(#otp-section)");
+                        if (inputGroup) inputGroup.classList.add("hidden");
+                        submitBtn.classList.add("hidden");
+                        
+                        const googleBtn = document.getElementById("google-login-btn");
+                        if (googleBtn) googleBtn.classList.add("hidden");
+                        
+                        const divider = document.querySelector(".divider");
+                        if (divider) divider.classList.add("hidden");
+                        
+                        // Show success state
+                        const successState = document.getElementById("success-state");
+                        if (successState) {
+                            successState.classList.remove("hidden");
+                            const successMsg = document.getElementById("success-message");
+                            if (successMsg) {
+                                successMsg.textContent = response.message || "Magic login link sent to your email";
+                            }
+                        } else {
+                            // Fallback if success-state element is missing
+                            showError("Magic login link sent to your email! Please check your inbox.");
+                        }
+                    }
                 } else {
                     const code = otpInput.value.trim();
                     if (!code || code.length < 6) {
@@ -224,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showError(error.message || "Authentication failed. Try again.");
                 submitBtn.disabled = false;
                 
-                if (submitBtn.textContent === "Transmitting OTP...") {
+                if (submitBtn.textContent === "Transmitting...") {
                     submitBtn.textContent = "Get Verification Link";
                 } else if (submitBtn.textContent === "Authorizing Access...") {
                     submitBtn.textContent = "Verify & Access";

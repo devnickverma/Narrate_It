@@ -3,20 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Turn PDFs into Narrated Voiceover Videos in Seconds. Decode page-by-page text, execute Gemini narrations, and compile MoviePy timeline animations natively.">
-    <title>NarrateIt — Turn PDFs into Narrated Videos</title>
+    <meta name="description" content="NarrateIt — Turn PDFs into Narrated Voiceover Videos in Seconds. Decode page-by-page text, execute Gemini narrations, and compile MoviePy timeline animations natively.">
+    <title>NarrateIt — Bring Your Documents to Life</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <div class="auth-wrapper">
-        <main class="auth-container glass" id="auth-root">
+    <!-- Ambient Radial Glow Decorations -->
+    <div class="ambient-glow">
+        <div class="glow-orange"></div>
+        <div class="glow-green"></div>
+        <div class="glow-center"></div>
+    </div>
+
+    <!-- Premium Floating Navbar -->
+    <div class="navbar-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-icon">🎬</span>
+                <span>NarrateIt</span>
+            </a>
+            <div class="navbar-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#showcase" class="nav-link">Showcase</a>
+                <a href="#how-it-works" class="nav-link">How it Works</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+            </div>
+            <div class="navbar-actions">
+                <button class="btn btn-secondary btn-sm open-auth-btn">Sign In</button>
+                <button class="btn btn-primary btn-sm open-auth-btn">Get Started</button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero container">
+        <div class="hero-tag reveal">
+            <span class="hero-tag-dot"></span>
+            <span>Now Powered by Gemini 1.5 Pro</span>
+        </div>
+        <h1 class="hero-title reveal delay-100">
+            Bring Your <span>Documents</span> <br>To Life With AI
+        </h1>
+        <p class="hero-subtitle reveal delay-200">
+            Convert any PDF document into a polished, studio-quality narrated video. Perfect for notes, reports, research papers, and manga.
+        </p>
+
+        <!-- Immersive Central Mock Upload Area -->
+        <div class="hero-upload-area reveal delay-300" id="hero-upload-cta">
+            <span class="hero-upload-icon">📥</span>
+            <h3 class="hero-upload-title">Drop your PDF here to begin</h3>
+            <p class="hero-upload-desc">Drag & drop your document, or click to browse files</p>
+        </div>
+
+        <!-- Floating 3D Decoration Cards -->
+        <div class="floating-mockups">
+            <!-- Mockup Card 1 -->
+            <div class="mockup-card mockup-1 anim-float">
+                <div class="mockup-thumb">📄</div>
+                <div class="mockup-meta">
+                    <span class="mockup-title">research_paper.pdf</span>
+                    <span class="mockup-sub">12 Pages</span>
+                </div>
+            </div>
+            <!-- Mockup Card 2 -->
+            <div class="mockup-card mockup-2 anim-float-reverse">
+                <div class="mockup-thumb">🎨</div>
+                <div class="mockup-meta">
+                    <span class="mockup-title">manga_chapter_1.pdf</span>
+                    <span class="mockup-sub">24 Pages</span>
+                </div>
+            </div>
+            <!-- Mockup Card 3 -->
+            <div class="mockup-card mockup-3 anim-float-slow">
+                <div class="mockup-thumb">📊</div>
+                <div class="mockup-meta">
+                    <span class="mockup-title">Q4_earnings_report.pdf</span>
+                    <span class="mockup-sub">8 Pages</span>
+                </div>
+            </div>
+            <!-- Mockup Card 4 -->
+            <div class="mockup-card mockup-4 anim-float">
+                <div class="mockup-thumb">📝</div>
+                <div class="mockup-meta">
+                    <span class="mockup-title">chemistry_notes.pdf</span>
+                    <span class="mockup-sub">15 Pages</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Showcase Section -->
+    <section id="showcase" class="container reveal">
+        <div class="section-header">
+            <span class="section-tag">Interactive Preview</span>
+            <h2 class="section-title">See Before & After</h2>
+            <p class="section-subtitle">Choose a document type below to see how NarrateIt transforms text into cinematic videos.</p>
+        </div>
+
+        <div class="showcase-switcher">
+            <button class="showcase-tab active" data-target="manga">Manga & Comics</button>
+            <button class="showcase-tab" data-target="research">Research Papers</button>
+            <button class="showcase-tab" data-target="notes">Lecture Notes</button>
+            <button class="showcase-tab" data-target="reports">Corporate Reports</button>
+        </div>
+
+        <!-- Manga Showcase Panel -->
+        <div class="showcase-panel active" id="panel-manga">
+            <div class="showcase-card glass">
+                <h3>Manga Chapter</h3>
+                <p>Convert visual storyboard layouts and speech bubble text overlays into cinematic action reels with dynamic reading speeds.</p>
+                <div class="pricing-features" style="margin-bottom: 0;">
+                    <li>High-fidelity panel scaling</li>
+                    <li>Sultry Deepgram voice narrations</li>
+                    <li>Sub-second timeline rendering</li>
+                </div>
+            </div>
+            <div class="showcase-preview-container">
+                <div class="showcase-preview-placeholder">
+                    <span class="showcase-preview-icon">🎬</span>
+                    <span>Manga Video Preview Player</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Showcase Panel -->
+        <div class="showcase-panel" id="panel-research">
+            <div class="showcase-card glass">
+                <h3>Academic Research</h3>
+                <p>Transform dense multi-column abstracts, data charts, and footnotes into digestable summaries with professional citation audio overlays.</p>
+                <div class="pricing-features" style="margin-bottom: 0;">
+                    <li>Multi-column paragraph decoding</li>
+                    <li>Perfect acronym pronunciation</li>
+                    <li>Visual chart highlight focus tracking</li>
+                </div>
+            </div>
+            <div class="showcase-preview-container">
+                <div class="showcase-preview-placeholder">
+                    <span class="showcase-preview-icon">📈</span>
+                    <span>Research Summary Preview Player</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Showcase Panel -->
+        <div class="showcase-panel" id="panel-notes">
+            <div class="showcase-card glass">
+                <h3>Lecture Notes</h3>
+                <p>Turn lecture slides, handwritten equations, and class briefs into active recall flashcard videos for mobile studying on the go.</p>
+                <div class="pricing-features" style="margin-bottom: 0;">
+                    <li>OCR handwritten text extraction</li>
+                    <li>Formula-to-speech rendering</li>
+                    <li>Key definitions highlight badges</li>
+                </div>
+            </div>
+            <div class="showcase-preview-container">
+                <div class="showcase-preview-placeholder">
+                    <span class="showcase-preview-icon">✏️</span>
+                    <span>Study Session Preview Player</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Showcase Panel -->
+        <div class="showcase-panel" id="panel-reports">
+            <div class="showcase-card glass">
+                <h3>Corporate Briefs</h3>
+                <p>Convert executive summaries, financial tables, and strategic agendas into executive audio briefs for quick briefings on commutes.</p>
+                <div class="pricing-features" style="margin-bottom: 0;">
+                    <li>Automated executive summaries</li>
+                    <li>Studio-quality reading flow pace</li>
+                    <li>Custom corporate branded outputs</li>
+                </div>
+            </div>
+            <div class="showcase-preview-container">
+                <div class="showcase-preview-placeholder">
+                    <span class="showcase-preview-icon">💼</span>
+                    <span>Corporate Video Preview Player</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="container reveal">
+        <div class="section-header">
+            <span class="section-tag">Process Timeline</span>
+            <h2 class="section-title">Convert In Three Steps</h2>
+            <p class="section-subtitle">Our automated cloud pipeline handles everything from text parsing to final media assembly.</p>
+        </div>
+
+        <div class="steps-grid">
+            <!-- Step 1 -->
+            <div class="step-card glass">
+                <span class="step-number">01</span>
+                <div class="step-icon">📂</div>
+                <h4>Upload Document</h4>
+                <p>Drag and drop any standard PDF. Pages are split into individual high-definition panels securely in Supabase.</p>
+            </div>
+            <!-- Step 2 -->
+            <div class="step-card glass">
+                <span class="step-number">02</span>
+                <div class="step-icon">🤖</div>
+                <h4>AI Generation</h4>
+                <p>Gemini analyzes panel context to draft scripts. Deepgram Aura synthesizes voiceover audio at your target reading speed.</p>
+            </div>
+            <!-- Step 3 -->
+            <div class="step-card glass">
+                <span class="step-number">03</span>
+                <div class="step-icon">🎬</div>
+                <h4>Stream & Download</h4>
+                <p>MoviePy composites images and audio tracks into a premium MP4 video, available for instant download in the dashboard.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Highlights Section -->
+    <section id="features" class="container reveal">
+        <div class="section-header">
+            <span class="section-tag">Powerful Features</span>
+            <h2 class="section-title">Engineered For Visual Speed</h2>
+            <p class="section-subtitle">Everything you need to render documents to media channels natively in the cloud.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card glass">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon">✍️</div>
+                </div>
+                <div class="feature-meta">
+                    <h4>Gemini Script Generation</h4>
+                    <p>Advanced LLM models analyze your PDF text and layouts to generate contextually aware script narrations for every slide.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="feature-card glass">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon">🎙️</div>
+                </div>
+                <div class="feature-meta">
+                    <h4>Deepgram TTS Voices</h4>
+                    <p>Leverage the state-of-the-art Deepgram Aura models to deliver natural, human-like voiceovers with custom pace adjustments.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="feature-card glass">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon">🎞️</div>
+                </div>
+                <div class="feature-meta">
+                    <h4>MoviePy Compilation</h4>
+                    <p>Automated backend timeline compilation blends voice files, slide panels, and transitions into lightweight, optimized MP4 videos.</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="feature-card glass">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon">☁️</div>
+                </div>
+                <div class="feature-meta">
+                    <h4>Supabase Cloud Sync</h4>
+                    <p>Secure authentication via Supabase JWT guards your private dashboard while encrypted vaults store and secure your API credentials.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="container reveal">
+        <div class="section-header">
+            <span class="section-tag">Simple Pricing</span>
+            <h2 class="section-title">Start Generating Now</h2>
+            <p class="section-subtitle">Choose the plan that fits your volume needs. No credit card required to start.</p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card glass">
+                <span class="pricing-tier">Starter</span>
+                <div class="pricing-price">$0 <span>/ forever</span></div>
+                <ul class="pricing-features">
+                    <li>3 video renders per month</li>
+                    <li>Max 10 pages per PDF</li>
+                    <li>Standard Deepgram voice models</li>
+                    <li>128kbps audio quality</li>
+                </ul>
+                <button class="btn btn-secondary open-auth-btn" style="margin-top: auto;">Sign Up Free</button>
+            </div>
+            <!-- Pro Plan -->
+            <div class="pricing-card glass premium">
+                <span class="pricing-badge">Popular</span>
+                <span class="pricing-tier">Creator Pro</span>
+                <div class="pricing-price">$19 <span>/ month</span></div>
+                <ul class="pricing-features">
+                    <li>Unlimited video renders</li>
+                    <li>Max 100 pages per PDF</li>
+                    <li>Premium custom voice models</li>
+                    <li>High-definition 320kbps audio</li>
+                    <li>Cloud video history archives</li>
+                </ul>
+                <button class="btn btn-primary open-auth-btn" style="margin-top: auto;">Get Started Pro</button>
+            </div>
+            <!-- Enterprise Plan -->
+            <div class="pricing-card glass">
+                <span class="pricing-tier">Enterprise</span>
+                <div class="pricing-price">Custom <span>/ volume</span></div>
+                <ul class="pricing-features">
+                    <li>Dedicated server pipelines</li>
+                    <li>Unlimited pages per PDF</li>
+                    <li>API access & webhook syncs</li>
+                    <li>Branded custom templates</li>
+                    <li>Priority rendering support</li>
+                </ul>
+                <button class="btn btn-secondary open-auth-btn" style="margin-top: auto;">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <span class="footer-brand-title">🎬 NarrateIt</span>
+                <p class="footer-brand-desc">Making documents dynamic. Turn standard PDFs into beautifully narrated voiceover videos in seconds.</p>
+            </div>
+            <div class="footer-column">
+                <h5>Product</h5>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#showcase">Showcase</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h5>Resources</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Guides</a></li>
+                    <li><a href="#">API Reference</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h5>Legal</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Security Vault</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>© 2026 NarrateIt Inc. All rights reserved.</span>
+            <span>Built with Vanilla Web Technologies.</span>
+        </div>
+    </footer>
+
+    <!-- Authenticated Login Modal Overlays -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-overlay" id="auth-overlay"></div>
+        <div class="modal-container glass" id="auth-root">
             
-            <header class="brand-header">
-                <div class="brand-icon">🎬</div>
-                <h1 class="brand-title">NarrateIt</h1>
-                <p class="brand-subtitle">Turn PDFs into Narrated Videos in Seconds</p>
-            </header>
+            <div class="modal-header">
+                <h3 class="modal-title">Welcome to NarrateIt</h3>
+                <button class="btn-close" id="close-auth-btn" aria-label="Close authentication modal">&times;</button>
+            </div>
+            
+            <p class="modal-subtitle">Access your personal document rendering workspace securely. OTP verification codes are dispatched on demand.</p>
 
             <!-- Authentication Form Layout -->
             <form id="login-form" aria-label="Passwordless Authentication Form">
@@ -47,11 +400,19 @@
                     >
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="submit-btn">
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%;">
                     Get Verification Link
                 </button>
 
             </form>
+
+            <!-- Email OTP Sent Success State UI -->
+            <div id="success-state" class="success-card hidden">
+                <div class="success-icon">✉️</div>
+                <h3 class="success-title">Verification Sent</h3>
+                <p class="success-desc" id="success-message">Magic login link sent to your email</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.location.reload()" style="margin-top: 20px; width: 100%;">Back to login</button>
+            </div>
 
             <div class="divider">or continue with</div>
 
@@ -64,12 +425,88 @@
             <!-- Active Error Card Collections -->
             <div class="error-card hidden" id="error-message" role="alert"></div>
 
-        </main>
+        </div>
     </div>
 
     <!-- Scripts Bootstrapping -->
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/api.js"></script>
     <script type="module" src="js/auth.js"></script>
+
+    <!-- Landing Page Interactions & Scroll Animations -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Scroll Reveal Animations (using IntersectionObserver)
+            const revealElements = document.querySelectorAll(".reveal");
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15
+            });
+
+            revealElements.forEach((el) => observer.observe(el));
+
+            // 2. Modal Toggle State Handler
+            const authModal = document.getElementById("auth-modal");
+            const authOverlay = document.getElementById("auth-overlay");
+            const closeAuthBtn = document.getElementById("close-auth-btn");
+            const openAuthButtons = document.querySelectorAll(".open-auth-btn");
+            const heroUploadCta = document.getElementById("hero-upload-cta");
+
+            const showModal = () => {
+                authModal.classList.remove("hidden");
+                document.body.style.overflow = "hidden"; // Lock scroll
+            };
+
+            const hideModal = () => {
+                authModal.classList.add("hidden");
+                document.body.style.overflow = ""; // Restore scroll
+            };
+
+            openAuthButtons.forEach(btn => btn.addEventListener("click", showModal));
+            if (heroUploadCta) heroUploadCta.addEventListener("click", showModal);
+            if (closeAuthBtn) closeAuthBtn.addEventListener("click", hideModal);
+            if (authOverlay) authOverlay.addEventListener("click", hideModal);
+
+            // Drag and drop handler for mock upload cta
+            if (heroUploadCta) {
+                heroUploadCta.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    heroUploadCta.style.borderColor = "var(--primary)";
+                });
+
+                heroUploadCta.addEventListener("dragleave", () => {
+                    heroUploadCta.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                });
+
+                heroUploadCta.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    heroUploadCta.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                    showModal();
+                });
+            }
+
+            // 3. Interactive Showcase Tab Switcher
+            const tabs = document.querySelectorAll(".showcase-tab");
+            const panels = document.querySelectorAll(".showcase-panel");
+
+            tabs.forEach(tab => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove("active"));
+                    panels.forEach(p => p.classList.remove("active"));
+
+                    tab.classList.add("active");
+                    const target = tab.getAttribute("data-target");
+                    const targetPanel = document.getElementById(`panel-${target}`);
+                    if (targetPanel) targetPanel.classList.add("active");
+                });
+            });
+        });
+    </script>
 </body>
 </html>

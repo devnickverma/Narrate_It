@@ -9,6 +9,7 @@ class Settings:
     SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+    OTP_LOGIN_MODE = os.getenv("OTP_LOGIN_MODE", "False").lower() in ("true", "1", "t")
     
     # FastAPI specific configurations
     APP_NAME = "NarrateIt API"
