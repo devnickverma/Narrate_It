@@ -1,38 +1,38 @@
-/* Design Tokens and Theme Variables */
+/* Design Tokens — Light Mode Only */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Color Palette */
-    --bg-main: #030303;
-    --bg-surface: rgba(15, 15, 22, 0.6);
-    --bg-surface-solid: #0A0A0F;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.16);
-    --border-focus: rgba(255, 126, 64, 0.4);
+    /* Background Surfaces */
+    --bg-main: #FAF8F5;
+    --bg-surface: rgba(243, 241, 237, 0.75);
+    --bg-surface-solid: #EFECE6;
+    --border-color: rgba(139, 92, 26, 0.12);
+    --border-hover: rgba(139, 92, 26, 0.22);
+    --border-focus: rgba(255, 126, 64, 0.5);
 
     /* Highlights & Accents */
-    --primary: #FF7E40; /* Warm cream/orange */
-    --primary-glow: rgba(255, 126, 64, 0.18);
-    --primary-gradient: linear-gradient(135deg, #FF9E6A 0%, #FF661D 100%);
-    --secondary: #A3E635; /* Soft sage green */
-    --secondary-glow: rgba(163, 230, 53, 0.15);
+    --primary: #FF7E40; 
+    --primary-glow: rgba(255, 126, 64, 0.12);
+    --primary-gradient: linear-gradient(135deg, #FF7E40 0%, #E65A15 100%);
+    --secondary: #A3E635; 
+    --secondary-glow: rgba(163, 230, 53, 0.1);
     --accent: #FB923C;
 
-    /* Text Hierarchy */
-    --text-primary: #F8FAFC;
-    --text-secondary: #CBD5E1;
-    --text-muted: #64748B;
-    --text-glow: rgba(255, 255, 255, 0.85);
+    /* Text Hierarchy — All dark, readable on light backgrounds */
+    --text-primary: #111111;
+    --text-secondary: #3D4555;
+    --text-muted: #6B7280;
+    --text-glow: rgba(30, 41, 59, 0.85);
 
-    /* Glassmorphism */
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-blur: blur(24px);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    /* Glassmorphism (lightweight, no heavy blur) */
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-blur: blur(6px);
+    --glass-shadow: 0 4px 16px 0 rgba(139, 92, 26, 0.04);
 
-    /* Typography Scales */
+    /* Typography */
     --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-    /* Transitions & Timings */
-    --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-fast: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Transitions — lightweight, no "all" property */
+    --transition-smooth: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+    --transition-fast: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }

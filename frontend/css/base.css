@@ -1,82 +1,101 @@
-/* Base HTML Resets and Layout Structure */
+/* ========================================
+   NarrateIt — Global Base Reset & Typography
+   ========================================
+   This file provides:
+   - Universal box-sizing reset
+   - Margin/padding reset
+   - Body background & font application
+   - Default link and text styles
+   - Custom scrollbar styling
+   - Section spacing rhythm
+   - Utility classes
+   ======================================== */
 
-* {
-    box-sizing: border-box;
+/* 1. Universal Reset */
+*, *::before, *::after {
     margin: 0;
     padding: 0;
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
 }
 
+/* 2. Root HTML & Body */
 html {
+    font-size: 16px;
     scroll-behavior: smooth;
-    background-color: var(--bg-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 body {
+    font-family: var(--font-sans);
     background-color: var(--bg-main);
     color: var(--text-primary);
+    line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative;
+    transition: var(--theme-transition);
+}
+
+/* 3. Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    line-height: 1.2;
+    font-weight: 700;
+    transition: var(--theme-transition);
+}
+
+p {
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
     line-height: 1.6;
 }
 
-/* Background Radial Glow Highlights (Ambient Lighting) */
-.ambient-glow {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -2;
-    pointer-events: none;
-    overflow: hidden;
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-fast);
 }
 
-.glow-orange {
-    position: absolute;
-    top: -15%;
-    left: 20%;
-    width: 60%;
-    height: 60%;
-    background: radial-gradient(circle, rgba(255, 126, 64, 0.08) 0%, transparent 60%);
-    filter: blur(80px);
+a:hover {
+    color: var(--primary);
 }
 
-.glow-green {
-    position: absolute;
-    bottom: -10%;
-    right: -10%;
-    width: 50%;
-    height: 50%;
-    background: radial-gradient(circle, rgba(163, 230, 53, 0.04) 0%, transparent 60%);
-    filter: blur(80px);
+ul, ol {
+    list-style: none;
 }
 
-.glow-center {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    height: 70%;
-    background: radial-gradient(circle, rgba(255, 126, 64, 0.02) 0%, transparent 50%);
-    filter: blur(100px);
+img, video {
+    max-width: 100%;
+    display: block;
 }
 
-/* Scrollbar Customization */
+button {
+    font-family: var(--font-sans);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: none;
+}
+
+input, select, textarea {
+    font-family: var(--font-sans);
+    outline: none;
+}
+
+/* 4. Scrollbar Customization */
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #050507;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 126, 64, 0.15);
     border-radius: 4px;
 }
 
@@ -84,18 +103,36 @@ body {
     background: rgba(255, 126, 64, 0.3);
 }
 
-a {
-    color: inherit;
-    text-decoration: none;
+/* Firefox scrollbar */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 126, 64, 0.15) transparent;
+}
+
+/* 5. Section Vertical Rhythm */
+section {
+    padding: 100px 0;
+}
+
+/* 6. Utility Classes */
+.hidden {
+    display: none !important;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
+    width: 100%;
 }
 
-section {
-    padding: 100px 0;
-    position: relative;
+/* 7. Selection Highlight */
+::selection {
+    background: rgba(255, 126, 64, 0.25);
+    color: var(--text-primary);
+}
+
+::-moz-selection {
+    background: rgba(255, 126, 64, 0.25);
+    color: var(--text-primary);
 }

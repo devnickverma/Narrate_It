@@ -27,7 +27,7 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#showcase" class="nav-link">Showcase</a>
                 <a href="#how-it-works" class="nav-link">How it Works</a>
-                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#beta-status" class="nav-link">Beta Status</a>
             </div>
             <div class="navbar-actions">
                 <button class="btn btn-secondary btn-sm open-auth-btn">Sign In</button>
@@ -270,53 +270,45 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="container reveal">
+    <!-- Free While In Beta Section (Replaces Pricing) -->
+    <section id="beta-status" class="container reveal">
+        <div class="beta-container">
+            <div class="beta-card glass">
+                <span class="beta-badge">Public Beta</span>
+                <h2 class="beta-title">100% Free While In Beta</h2>
+                <p class="beta-desc">
+                    NarrateIt is in active development. During our public beta phase, all core features, high-performance rendering pipelines, and premium narration script generations are completely free.
+                </p>
+                <ul class="beta-features">
+                    <li>Free Gemini 1.5 Pro script generation</li>
+                    <li>Free Deepgram realistic voice models</li>
+                    <li>Unlimited timeline rendering tests</li>
+                    <li>Full access to your video history</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Key Onboarding Section -->
+    <section id="onboarding" class="container reveal">
         <div class="section-header">
-            <span class="section-tag">Simple Pricing</span>
-            <h2 class="section-title">Start Generating Now</h2>
-            <p class="section-subtitle">Choose the plan that fits your volume needs. No credit card required to start.</p>
+            <span class="section-tag">Quick Configuration</span>
+            <h2 class="section-title">Setup Takes Less Than 2 Minutes</h2>
+            <p class="section-subtitle">NarrateIt runs on your personal API credentials. Here is how to claim your free keys to get started.</p>
         </div>
 
-        <div class="pricing-grid">
-            <!-- Free Plan -->
-            <div class="pricing-card glass">
-                <span class="pricing-tier">Starter</span>
-                <div class="pricing-price">$0 <span>/ forever</span></div>
-                <ul class="pricing-features">
-                    <li>3 video renders per month</li>
-                    <li>Max 10 pages per PDF</li>
-                    <li>Standard Deepgram voice models</li>
-                    <li>128kbps audio quality</li>
-                </ul>
-                <button class="btn btn-secondary open-auth-btn" style="margin-top: auto;">Sign Up Free</button>
+        <div class="onboarding-grid">
+            <!-- Card 1: Gemini API -->
+            <div class="onboarding-card glass">
+                <h3>Google Gemini API</h3>
+                <p>Used to read slide structures, analyze panel art, and auto-draft script narrations. Claim your key from Google AI Studio's free tier.</p>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn btn-primary">Get Gemini API Key</a>
             </div>
-            <!-- Pro Plan -->
-            <div class="pricing-card glass premium">
-                <span class="pricing-badge">Popular</span>
-                <span class="pricing-tier">Creator Pro</span>
-                <div class="pricing-price">$19 <span>/ month</span></div>
-                <ul class="pricing-features">
-                    <li>Unlimited video renders</li>
-                    <li>Max 100 pages per PDF</li>
-                    <li>Premium custom voice models</li>
-                    <li>High-definition 320kbps audio</li>
-                    <li>Cloud video history archives</li>
-                </ul>
-                <button class="btn btn-primary open-auth-btn" style="margin-top: auto;">Get Started Pro</button>
-            </div>
-            <!-- Enterprise Plan -->
-            <div class="pricing-card glass">
-                <span class="pricing-tier">Enterprise</span>
-                <div class="pricing-price">Custom <span>/ volume</span></div>
-                <ul class="pricing-features">
-                    <li>Dedicated server pipelines</li>
-                    <li>Unlimited pages per PDF</li>
-                    <li>API access & webhook syncs</li>
-                    <li>Branded custom templates</li>
-                    <li>Priority rendering support</li>
-                </ul>
-                <button class="btn btn-secondary open-auth-btn" style="margin-top: auto;">Contact Sales</button>
+            <!-- Card 2: Deepgram API -->
+            <div class="onboarding-card glass">
+                <h3>Deepgram TTS API</h3>
+                <p>Used to synthesize ultra-realistic AI narrator voices from text. Signup to Deepgram Console to instantly claim free voice credits.</p>
+                <a href="https://console.deepgram.com/signup" target="_blank" class="btn btn-secondary">Get Deepgram API Key</a>
             </div>
         </div>
     </section>
@@ -333,7 +325,7 @@
                 <ul class="footer-links">
                     <li><a href="#features">Features</a></li>
                     <li><a href="#showcase">Showcase</a></li>
-                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#beta-status">Beta Status</a></li>
                 </ul>
             </div>
             <div class="footer-column">
@@ -369,10 +361,10 @@
                 <button class="btn-close" id="close-auth-btn" aria-label="Close authentication modal">&times;</button>
             </div>
             
-            <p class="modal-subtitle">Access your personal document rendering workspace securely. OTP verification codes are dispatched on demand.</p>
+            <p class="modal-subtitle">Access your personal AI document workspace instantly.</p>
 
-            <!-- Authentication Form Layout -->
-            <form id="login-form" aria-label="Passwordless Authentication Form">
+            <!-- Magic Link Login Form -->
+            <form id="login-form" aria-label="Email Login Form">
                 
                 <div class="input-group">
                     <label for="email-input" class="input-label">Email Address</label>
@@ -380,19 +372,20 @@
                         type="email" 
                         id="email-input" 
                         class="input-field" 
-                        placeholder="you@example.com" 
+                        placeholder="Enter your email address" 
                         required 
                         autocomplete="email"
                     >
                 </div>
 
+                <!-- Hidden OTP section — only shown if backend requires it -->
                 <div class="input-group hidden" id="otp-section">
-                    <label for="otp-input" class="input-label">Verification OTP Code</label>
+                    <label for="otp-input" class="input-label">Login Code</label>
                     <input 
                         type="text" 
                         id="otp-input" 
                         class="input-field" 
-                        placeholder="Enter 6-digit Code" 
+                        placeholder="Enter 6-digit code" 
                         inputmode="numeric" 
                         pattern="[0-9]{6}" 
                         maxlength="6"
@@ -400,29 +393,21 @@
                     >
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%;">
-                    Get Verification Link
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%; margin-top: 8px;">
+                    Send Login Link
                 </button>
 
             </form>
 
-            <!-- Email OTP Sent Success State UI -->
+            <!-- Login Link Sent Success State -->
             <div id="success-state" class="success-card hidden">
                 <div class="success-icon">✉️</div>
-                <h3 class="success-title">Verification Sent</h3>
-                <p class="success-desc" id="success-message">Magic login link sent to your email</p>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="window.location.reload()" style="margin-top: 20px; width: 100%;">Back to login</button>
+                <h3 class="success-title">Check Your Email</h3>
+                <p class="success-desc" id="success-message">We've sent you a secure login link. Open your inbox and click the link to access your workspace.</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.location.reload()" style="margin-top: 20px; width: 100%;">Return to Login</button>
             </div>
 
-            <div class="divider">or continue with</div>
-
-            <!-- Third party social authentication -->
-            <button class="btn btn-google" id="google-login-btn">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_color_144dp.png" alt="Google Brand Logo">
-                Sign in with Google
-            </button>
-
-            <!-- Active Error Card Collections -->
+            <!-- Error Display -->
             <div class="error-card hidden" id="error-message" role="alert"></div>
 
         </div>
@@ -436,6 +421,16 @@
     <!-- Landing Page Interactions & Scroll Animations -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Sticky navbar diagnostics & prevention
+            console.log("[NAVBAR] Sticky navbar initialized once");
+            const navbars = document.querySelectorAll(".navbar-wrapper");
+            if (navbars.length > 1) {
+                for (let i = 1; i < navbars.length; i++) {
+                    navbars[i].remove();
+                }
+                console.log("[NAVBAR] Duplicate navbar prevented");
+            }
+
             // 1. Scroll Reveal Animations (using IntersectionObserver)
             const revealElements = document.querySelectorAll(".reveal");
             const observer = new IntersectionObserver((entries) => {
@@ -459,13 +454,17 @@
             const heroUploadCta = document.getElementById("hero-upload-cta");
 
             const showModal = () => {
+                console.log("[AUTH_MODAL] opened");
                 authModal.classList.remove("hidden");
                 document.body.style.overflow = "hidden"; // Lock scroll
+                console.log("[SCROLL_LOCK] enabled");
             };
 
             const hideModal = () => {
+                console.log("[AUTH_MODAL] closed");
                 authModal.classList.add("hidden");
-                document.body.style.overflow = ""; // Restore scroll
+                document.body.style.removeProperty("overflow"); // Restore scroll
+                console.log("[SCROLL_LOCK] disabled");
             };
 
             openAuthButtons.forEach(btn => btn.addEventListener("click", showModal));

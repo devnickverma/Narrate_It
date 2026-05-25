@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const otpSection = document.getElementById("otp-section");
     const otpInput = document.getElementById("otp-input");
     const submitBtn = document.getElementById("submit-btn");
-    const googleLoginBtn = document.getElementById("google-login-btn");
     const errorMessage = document.getElementById("error-message");
 
     let isOtpSent = false;
@@ -56,11 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let cooldownTimer = null;
     let cooldownSeconds = 30;
 
+    // Store original button text for restoration
+    const defaultBtnText = "Send Login Link";
+
     // ==================================================
-    // 1. URL Hash Callback Parsing (Supabase Magic Link / Google Redirects)
+    // 1. URL Hash Callback Parsing (Supabase Magic Link Redirects)
     // ==================================================
     if (window.location.hash) {
-        console.log("[AUTH] URL hash fragment callback detected. Processing Supabase session credentials...");
+        console.log("[AUTH] URL hash fragment callback detected. Processing session credentials...");
         try {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
@@ -68,10 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const accessToken = params.get("access_token");
             const refreshToken = params.get("refresh_token");
             const expiresIn = params.get("expires_in");
-            const tokenType = params.get("token_type");
 
             if (accessToken) {
-                console.log("[AUTH] Successfully extracted access_token from hash fragment.");
+                console.log("[AUTH] Login link confirmed. Establishing session...");
                 
                 // Set precise expiration timestamp
                 const duration = expiresIn ? parseInt(expiresIn, 10) : 3600;
@@ -91,23 +92,22 @@ document.addEventListener("DOMContentLoaded", () => {
                         email: decoded.email
                     };
                     localStorage.setItem("supabase_user", JSON.stringify(userProfile));
-                    console.log("[AUTH] Successfully decoded user metadata from JWT claims:", userProfile);
+                    console.log("[AUTH] User session established:", userProfile.email);
                 } else {
-                    localStorage.setItem("supabase_user", JSON.stringify({ id: null, email: "oauth_user@narrate.it" }));
+                    localStorage.setItem("supabase_user", JSON.stringify({ id: null, email: "user@narrate.it" }));
                 }
 
-                console.log("[AUTH] Auth credentials cached successfully. Clearing hash from address bar...");
-                // Remove hash fragment cleanly from URL bar to prevent replay confusion
+                // Remove hash fragment cleanly from URL bar
                 window.history.replaceState(null, null, window.location.pathname);
 
-                // Redirect cleanly to workspace dashboard
-                console.log("[AUTH] Redirecting user directly to workspace dashboard.html");
+                // Redirect to workspace dashboard
+                console.log("[AUTH] Redirecting to workspace...");
                 window.location.href = "dashboard.html";
                 return;
             }
         } catch (e) {
-            console.error("[AUTH] Error processing URL hash callback:", e);
-            showError("Authentication failed during hash parsing callback.");
+            console.error("[AUTH] Error processing login callback:", e);
+            showError("Something went wrong. Please try again.");
         }
     }
 
@@ -116,16 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==================================================
     if (isSessionValid()) {
         const isDashboard = window.location.pathname.endsWith("dashboard.html");
-        console.log("[AUTH] Auth validation passed. Session is valid. Is Dashboard page:", isDashboard);
+        console.log("[AUTH] Active session found. Dashboard page:", isDashboard);
         if (!isDashboard) {
-            console.log("[AUTH] Redirecting to dashboard...");
+            console.log("[AUTH] Redirecting to workspace...");
             window.location.href = "dashboard.html";
             return;
         }
     } else {
-        // If expired or invalid, auto-purge lingering tokens to avoid half-states
+        // If expired or invalid, auto-purge lingering tokens
         if (localStorage.getItem("supabase_access_token")) {
-            console.log("[AUTH] Lingering expired session identified. Flushing auth variables.");
+            console.log("[AUTH] Expired session found. Clearing credentials.");
             localStorage.removeItem("supabase_access_token");
             localStorage.removeItem("supabase_refresh_token");
             localStorage.removeItem("supabase_expires_at");
@@ -133,22 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Google OAuth Handler
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener("click", () => {
-            console.log("[AUTH] Initiating third-party Google OAuth redirection...");
-            errorMessage.classList.add("hidden");
-            
-            // Get root execution host for local development redirections
-            const currentHost = window.location.origin + window.location.pathname;
-            console.log("[AUTH] Setting callback redirection landing URL to:", currentHost);
-            
-            const authUrl = `https://usnxhtmgkdbrcvlysfsv.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(currentHost)}`;
-            window.location.href = authUrl;
-        });
-    }
-
-    // Email Passwordless OTP submit handler
+    // ==================================================
+    // 3. Email Magic Link Submit Handler
+    // ==================================================
     if (loginForm) {
         loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -161,37 +148,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Disable button and show loading state
             submitBtn.disabled = true;
 
             try {
                 if (!isOtpSent) {
-                    console.log(`[AUTH] [REQUEST] Requesting OTP code transmission for: ${email}`);
-                    submitBtn.textContent = "Transmitting...";
+                    console.log(`[AUTH] Sending login link to: ${email}`);
+                    submitBtn.textContent = "Sending Link...";
                     
                     const response = await sendOtp(email);
-                    console.log("[AUTH] [RESPONSE] sendOtp response:", response);
+                    console.log("[AUTH] Login link response:", response);
                     
                     if (response && response.otp_required) {
+                        // Backend requires code entry — show code input
                         isOtpSent = true;
                         pendingEmail = email;
                         emailInput.disabled = true;
                         otpSection.classList.remove("hidden");
                         otpInput.required = true;
                         otpInput.focus();
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Continue";
                         
                         startResendCooldown();
                     } else {
-                        // Magic link mode: Show success state UI!
-                        // Hide login form inputs and Google login elements
+                        // Magic link mode: Show success state
+                        console.log("[AUTH] Login link sent successfully");
+                        
                         const inputGroup = loginForm.querySelector(".input-group:not(#otp-section)");
                         if (inputGroup) inputGroup.classList.add("hidden");
                         submitBtn.classList.add("hidden");
-                        
-                        const googleBtn = document.getElementById("google-login-btn");
-                        if (googleBtn) googleBtn.classList.add("hidden");
-                        
-                        const divider = document.querySelector(".divider");
-                        if (divider) divider.classList.add("hidden");
                         
                         // Show success state
                         const successState = document.getElementById("success-state");
@@ -199,33 +185,29 @@ document.addEventListener("DOMContentLoaded", () => {
                             successState.classList.remove("hidden");
                             const successMsg = document.getElementById("success-message");
                             if (successMsg) {
-                                successMsg.textContent = response.message || "Magic login link sent to your email";
+                                successMsg.textContent = response.message || "We've sent you a secure login link. Open your inbox and click the link to access your workspace.";
                             }
-                        } else {
-                            // Fallback if success-state element is missing
-                            showError("Magic login link sent to your email! Please check your inbox.");
                         }
                     }
                 } else {
+                    // Code verification path
                     const code = otpInput.value.trim();
                     if (!code || code.length < 6) {
-                        showError("Please enter a valid 6-digit OTP verification code.");
+                        showError("Please enter the 6-digit code from your email.");
                         submitBtn.disabled = false;
                         return;
                     }
 
-                    console.log(`[AUTH] [REQUEST] Verifying OTP token: ${code} for email: ${pendingEmail}`);
-                    submitBtn.textContent = "Authorizing Access...";
+                    console.log(`[AUTH] Verifying login code for: ${pendingEmail}`);
+                    submitBtn.textContent = "Signing in...";
                     
                     const response = await verifyOtp(pendingEmail, code);
-                    console.log("[AUTH] [RESPONSE] verifyOtp response:", response);
+                    console.log("[AUTH] Login code verified successfully");
 
                     if (response.access_token) {
-                        submitBtn.classList.remove("btn-primary", "btn-verify");
                         submitBtn.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
-                        submitBtn.textContent = "Authorized! Redirecting...";
+                        submitBtn.textContent = "Welcome! Redirecting...";
                         
-                        // Default token duration: 1 hour (3600 seconds)
                         const duration = 3600;
                         const expiresAt = Date.now() + duration * 1000;
                         
@@ -238,23 +220,24 @@ document.addEventListener("DOMContentLoaded", () => {
                             localStorage.setItem("supabase_user", JSON.stringify(response.user));
                         }
                         
-                        console.log("[AUTH] Passwordless session validated successfully. Triggering Dashboard redirect.");
+                        console.log("[AUTH] Session established. Redirecting to workspace.");
                         setTimeout(() => {
                             window.location.href = "dashboard.html";
                         }, 1000);
                     } else {
-                        throw new Error("Credentials omitted inside verify OTP callback response.");
+                        throw new Error("Unable to establish session. Please try again.");
                     }
                 }
             } catch (error) {
-                console.error("[AUTH] Authentication loop failed:", error);
-                showError(error.message || "Authentication failed. Try again.");
+                console.error("[AUTH] Login link request failed:", error);
+                showError(error.message || "Something went wrong. Please try again.");
                 submitBtn.disabled = false;
                 
-                if (submitBtn.textContent === "Transmitting...") {
-                    submitBtn.textContent = "Get Verification Link";
-                } else if (submitBtn.textContent === "Authorizing Access...") {
-                    submitBtn.textContent = "Verify & Access";
+                // Restore button text based on current state
+                if (!isOtpSent) {
+                    submitBtn.textContent = defaultBtnText;
+                } else {
+                    submitBtn.textContent = "Continue";
                 }
             }
         });
@@ -271,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (cooldownSeconds <= 0) {
                 clearInterval(cooldownTimer);
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Verify & Access";
+                submitBtn.textContent = "Continue";
                 
                 let resendHint = document.getElementById("resend-hint");
                 if (!resendHint) {
@@ -280,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     resendHint.style.fontSize = "0.8rem";
                     resendHint.style.marginTop = "12px";
                     resendHint.style.color = "var(--text-muted)";
-                    resendHint.innerHTML = "Didn't receive a code? <span style='color: var(--primary); cursor: pointer; text-decoration: underline;' id='resend-trigger'>Resend OTP</span>";
+                    resendHint.innerHTML = "Didn't receive a code? <span style='color: var(--primary); cursor: pointer; text-decoration: underline;' id='resend-trigger'>Resend</span>";
                     loginForm.appendChild(resendHint);
                     
                     document.getElementById("resend-trigger").addEventListener("click", () => {
@@ -289,12 +272,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         otpSection.classList.add("hidden");
                         otpInput.value = "";
                         resendHint.remove();
-                        submitBtn.textContent = "Get Verification Link";
+                        submitBtn.textContent = defaultBtnText;
                         submitBtn.click();
                     });
                 }
             } else {
-                submitBtn.textContent = `Verify & Access (${cooldownSeconds}s)`;
+                submitBtn.textContent = `Continue (${cooldownSeconds}s)`;
             }
         }, 1000);
     }
@@ -311,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Global standard logout sequence
 function logout() {
-    console.log("[AUTH] Logging out user. Flushing cached persistent localStorage tokens.");
+    console.log("[AUTH] Logging out. Clearing session.");
     if (typeof window.abortActiveOperations === "function") {
         try {
             window.abortActiveOperations();
@@ -324,10 +307,9 @@ function logout() {
     localStorage.removeItem("supabase_expires_at");
     localStorage.removeItem("supabase_user");
     
-    console.log("[AUTH] Flush sequence completed. Redirecting to index.html login page.");
+    console.log("[AUTH] Session cleared. Redirecting to login.");
     window.location.href = "index.html";
 }
 
 window.logout = logout;
 export { logout, isSessionValid };
-

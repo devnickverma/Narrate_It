@@ -5,6 +5,8 @@ if (window.__dashboard_booted) {
 } else {
     window.__dashboard_booted = true;
 
+    // Removed theme initialization
+
     // Global controllers for request cancellation
     window.__upload_abort_controller = null;
     window.__generate_abort_controller = null;
@@ -70,23 +72,44 @@ if (window.__dashboard_booted) {
         
         card.innerHTML = `
             <div class="video-preview-container">
-                <video src="${videoUrl}" controls preload="metadata" class="preview-player"></video>
+                <div class="video-thumbnail-preview">
+                    <!-- Premium subtle document illustration -->
+                    <div class="thumbnail-pattern">
+                        <div class="pattern-line line-long"></div>
+                        <div class="pattern-line line-medium"></div>
+                        <div class="pattern-line line-short"></div>
+                    </div>
+                    
+                    <!-- Centered premium play icon (visible by default) -->
+                    <div class="thumbnail-play-btn">
+                        <span class="play-icon">▶</span>
+                    </div>
+                    
+                    <!-- Fake premium timeline strip at bottom of thumbnail -->
+                    <div class="thumbnail-timeline">
+                        <div class="timeline-progress"></div>
+                        <span class="timeline-time">0:45</span>
+                    </div>
+                </div>
+                <!-- Clean floating download overlay button -->
+                <a href="${videoUrl}" download="${item.name || 'video.mp4'}" target="_blank" class="download-overlay-btn" title="Download MP4" onclick="event.stopPropagation()">
+                    <span>📥</span>
+                </a>
             </div>
             <div class="video-meta">
                 <h4 class="meta-title" title="${titleText}">${titleText}</h4>
                 <div class="meta-sub">
-                    <span>Status: <strong class="badge-success">Success</strong></span>
-                    <span>Created: ${createdDate}</span>
+                    <span class="badge-success">Success</span>
+                    <span>${createdDate}</span>
                 </div>
-            </div>
-            <div class="video-card-actions">
-                <a href="${videoUrl}" download="${item.name || 'video.mp4'}" target="_blank" class="btn-card-action btn-download-action">
-                    <span>📥</span> Download MP4
-                </a>
             </div>
         `;
         
-        console.log("each rendered card:", card);
+        card.addEventListener("click", () => {
+            openVideoModal(videoUrl, titleText);
+        });
+
+        console.log("[VIDEO_CARD] Premium card rendered");
 
         if (prepend) {
             if (emptyHistoryPlaceholder) {
@@ -96,11 +119,46 @@ if (window.__dashboard_booted) {
         } else {
             videoHistoryGrid.appendChild(card);
         }
-        console.log("DOM append success:", card);
     }
 
     function prependVideoCard(videoData) {
         renderVideoCard(videoData, true);
+    }
+
+    function openVideoModal(url, title) {
+        const modal = document.getElementById("video-player-modal");
+        const videoPlayer = document.getElementById("modal-video-player");
+        const videoTitle = document.getElementById("modal-video-title");
+
+        if (modal && videoPlayer) {
+            if (videoTitle) {
+                videoTitle.textContent = title;
+            }
+            videoPlayer.src = url;
+            videoPlayer.load();
+            videoPlayer.play().catch(err => console.log("Auto-play prevented:", err));
+            modal.classList.remove("hidden");
+            
+            // Disable page scroll
+            document.body.style.overflow = "hidden";
+            
+            console.log("[VIDEO_MODAL] Opened");
+        }
+    }
+
+    function closeVideoModal() {
+        const modal = document.getElementById("video-player-modal");
+        const videoPlayer = document.getElementById("modal-video-player");
+
+        if (modal && videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.removeAttribute("src"); // fully unload source
+            videoPlayer.load(); // clear buffers
+            modal.classList.add("hidden");
+            
+            // Restore scroll
+            document.body.style.removeProperty("overflow");
+        }
     }
 
     // Fetch Public Archives History (Isolated, lock-guarded)
@@ -118,14 +176,36 @@ if (window.__dashboard_booted) {
         }
         window.__history_abort_controller = new AbortController();
 
+        if (!videoHistoryGrid) {
+            console.error("[FATAL] Video history grid element #video-history-grid was not found in DOM.");
+            window.__history_loading = false;
+            return;
+        }
+
+        // Clear only video cards, keeping emptyHistoryPlaceholder in the DOM
+        const cards = videoHistoryGrid.querySelectorAll(".video-card");
+        cards.forEach(card => card.remove());
+
+        // Render skeleton loading cards
+        const skeletonCount = 4;
+        const skeletons = [];
+        for (let i = 0; i < skeletonCount; i++) {
+            const skeleton = document.createElement("div");
+            skeleton.className = "video-card skeleton-card glass";
+            skeleton.innerHTML = `
+                <div class="video-preview-container skeleton-shimmer"></div>
+                <div class="video-meta">
+                    <div class="skeleton-line title-skeleton skeleton-shimmer" style="margin-top: 4px;"></div>
+                    <div class="skeleton-line sub-skeleton skeleton-shimmer" style="margin-top: 8px;"></div>
+                </div>
+            `;
+            videoHistoryGrid.appendChild(skeleton);
+            skeletons.push(skeleton);
+        }
+
         try {
             const response = await getHistory(userId, window.__history_abort_controller.signal);
             console.log("raw history response:", response);
-            
-            if (!videoHistoryGrid) {
-                console.error("[FATAL] Video history grid element #video-history-grid was not found in DOM.");
-                return;
-            }
             
             let videos = [];
             if (response) {
@@ -148,9 +228,8 @@ if (window.__dashboard_booted) {
             // Sort videos newest first
             videos.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
-            // Clear only video cards, keeping emptyHistoryPlaceholder in the DOM
-            const cards = videoHistoryGrid.querySelectorAll(".video-card");
-            cards.forEach(card => card.remove());
+            // Remove skeletons
+            skeletons.forEach(s => s.remove());
 
             if (videos.length === 0) {
                 if (emptyHistoryPlaceholder) {
@@ -169,6 +248,8 @@ if (window.__dashboard_booted) {
             console.log("[DASHBOARD] History refreshed");
             console.log("[HISTORY] Total rendered cards:", videos.length);
         } catch (error) {
+            // Remove skeletons on error
+            skeletons.forEach(s => s.remove());
             if (error.name !== "AbortError") {
                 console.error("[DASHBOARD] History loader error:", error);
             }
@@ -576,6 +657,30 @@ if (window.__dashboard_booted) {
                 }
             });
         });
+
+        // Video Modal Event Bindings
+        const videoModal = document.getElementById("video-player-modal");
+        const closeVideoModalBtn = document.getElementById("close-video-modal-btn");
+        const videoModalOverlay = document.getElementById("video-modal-overlay");
+
+        if (closeVideoModalBtn) {
+            closeVideoModalBtn.addEventListener("click", closeVideoModal);
+        }
+        if (videoModalOverlay) {
+            videoModalOverlay.addEventListener("click", closeVideoModal);
+        }
+
+        // Close on Escape key press
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                const modal = document.getElementById("video-player-modal");
+                if (modal && !modal.classList.contains("hidden")) {
+                    closeVideoModal();
+                }
+            }
+        });
+
+        // Theme toggle logic removed
 
         // Load saved keys
         await loadInitialKeys();

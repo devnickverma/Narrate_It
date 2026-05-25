@@ -22,8 +22,8 @@
         gap: 24px;
     }
 
-    .pricing-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .onboarding-grid {
+        grid-template-columns: 1fr;
         gap: 24px;
     }
 
@@ -31,12 +31,38 @@
         grid-template-columns: 1fr 1fr;
         gap: 40px;
     }
+
+    /* Reduce section spacing on tablet */
+    #showcase,
+    #how-it-works,
+    #features,
+    #beta-status {
+        padding-top: 60px;
+        padding-bottom: 30px;
+    }
+    #onboarding {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
 }
 
 /* 2. Mobile Viewports (max-width: 768px) */
 @media (max-width: 768px) {
     section {
         padding: 60px 0;
+    }
+
+    /* Reduce section spacing on mobile */
+    #showcase,
+    #how-it-works,
+    #features,
+    #beta-status {
+        padding-top: 40px;
+        padding-bottom: 20px;
+    }
+    #onboarding {
+        padding-top: 40px;
+        padding-bottom: 48px;
     }
 
     .navbar-links {
@@ -80,13 +106,18 @@
         gap: 24px;
     }
 
-    .pricing-grid {
+    .onboarding-grid {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 20px;
     }
 
-    .pricing-card {
-        padding: 32px 24px;
+    .onboarding-card {
+        padding: 24px;
+    }
+
+    .beta-features {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     .footer-grid {

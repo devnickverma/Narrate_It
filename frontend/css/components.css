@@ -1,197 +1,275 @@
-/* Shared Design System Components */
+/* ========================================
+   NarrateIt — Reusable Component Styles
+   ========================================
+   This file provides:
+   - Button system (.btn, .btn-primary, .btn-secondary, .btn-sm, .btn-google)
+   - Glass card effect (.glass)
+   - Form input system (.input-group, .input-label, .input-field)
+   - Divider line (.divider)
+   - Auth state cards (.success-card, .error-card)
+   - Ambient glow decorations
+   ======================================== */
 
-/* 1. Glassmorphism Card System */
-.glass {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    box-shadow: var(--glass-shadow);
-    transition: var(--transition-smooth);
-}
+/* ==========================================
+   1. BUTTON SYSTEM
+   ========================================== */
 
-.glass:hover {
-    border-color: var(--border-hover);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-}
-
-/* Panel card for structured pages */
-.panel-card {
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
-    padding: 32px;
-    transition: var(--transition-smooth);
-}
-
-.panel-card:hover {
-    border-color: rgba(255, 126, 64, 0.15);
-}
-
-/* 2. Sleek Interactive Buttons */
 .btn {
     display: inline-flex;
-    justify-content: center;
     align-items: center;
-    gap: 10px;
-    padding: 14px 28px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    font-size: 0.95rem;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.9rem;
     font-weight: 600;
+    border: 1px solid transparent;
     cursor: pointer;
     transition: var(--transition-smooth);
-    user-select: none;
-    outline: none;
-    text-align: center;
+    white-space: nowrap;
+    text-decoration: none;
+    line-height: 1.4;
 }
 
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Primary Button — Warm gradient orange */
 .btn-primary {
     background: var(--primary-gradient);
-    color: #030303;
-    box-shadow: 0 4px 24px rgba(255, 126, 64, 0.25);
+    color: #FFF;
     border: none;
+    box-shadow: 0 4px 15px rgba(255, 126, 64, 0.25);
 }
 
 .btn-primary:hover {
+    box-shadow: 0 6px 25px rgba(255, 126, 64, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(255, 126, 64, 0.45);
+    filter: brightness(1.08);
 }
 
 .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(255, 126, 64, 0.2);
 }
 
+/* Secondary Button — Ghost outline */
 .btn-secondary {
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-color);
     color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: var(--border-hover);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
-.btn-secondary:active {
-    transform: translateY(0);
-}
-
-.btn-google {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    width: 100%;
-}
-
-.btn-google:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-}
-
-.btn-google img {
-    width: 18px;
-    height: 18px;
-}
-
+/* Small Button Modifier */
 .btn-sm {
-    padding: 10px 18px;
-    font-size: 0.85rem;
+    padding: 8px 16px;
+    font-size: 0.82rem;
     border-radius: 8px;
 }
 
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
+/* Google Sign-In Button */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
 }
 
-/* 3. Reusable Form & Input elements */
+.btn-google img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.btn-google:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   2. GLASSMORPHISM CARD EFFECT
+   ========================================== */
+
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    transition: var(--theme-transition);
+}
+
+.glass:hover {
+    border-color: var(--border-hover);
+}
+
+/* ==========================================
+   3. FORM INPUT SYSTEM
+   ========================================== */
+
 .input-group {
-    margin-bottom: 24px;
-    text-align: left;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 16px;
 }
 
 .input-label {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
 }
 
 .input-field {
     width: 100%;
-    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 16px;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px 18px;
-    color: #FFF;
-    font-size: 0.95rem;
-    outline: none;
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: var(--font-sans);
     transition: var(--transition-smooth);
 }
 
-.input-field:focus {
-    border-color: var(--primary);
-    background: rgba(255, 126, 64, 0.02);
-    box-shadow: 0 0 16px var(--primary-glow);
-}
-
-/* Password wrapper utility */
-.password-input-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.password-input-wrapper .input-field {
-    padding-right: 48px;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
+.input-field::placeholder {
     color: var(--text-muted);
-    cursor: pointer;
-    font-size: 1.1rem;
-    user-select: none;
-    transition: var(--transition-fast);
 }
 
-.toggle-password:hover {
+.input-field:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 126, 64, 0.08);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Select dropdown styling */
+select.input-field {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2394A3B8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 10px;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+select.input-field option {
+    background: var(--bg-surface-solid);
     color: var(--text-primary);
 }
 
-/* 4. Elegant Glass Modal Layout */
+/* ==========================================
+   4. DIVIDER
+   ========================================== */
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+/* ==========================================
+   5. AUTH STATE CARDS
+   ========================================== */
+
+/* Success State Card (OTP sent) */
+.success-card {
+    text-align: center;
+    padding: 24px 16px;
+    animation: fade-in-up 0.4s ease forwards;
+}
+
+.success-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.success-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.success-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Error message card */
+.error-card {
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: #F87171;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: -2px;
+}
+
+/* ==========================================
+   8. MODAL COMPONENT — Premium SaaS Style
+   ========================================== */
+
 .modal {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     z-index: 1000;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 24px;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .modal.hidden {
     opacity: 0;
-    visibility: hidden;
     pointer-events: none;
+    visibility: hidden;
 }
 
 .modal-overlay {
@@ -200,46 +278,58 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(3, 3, 3, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(10, 10, 10, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-container {
     position: relative;
-    width: 100%;
-    max-width: 480px;
-    padding: 40px;
-    z-index: 1;
-    animation: modal-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    width: 90%;
+    max-width: 420px;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 36px 32px 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    z-index: 1001;
+    transform: scale(1) translateY(0);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
 }
 
-@keyframes modal-enter {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+.modal.hidden .modal-container {
+    transform: scale(0.97) translateY(8px);
+    opacity: 0;
+}
+
+#video-player-modal .modal-container {
+    max-width: 800px;
+    padding: 24px;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    transform: scale(0.97);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#video-player-modal:not(.hidden) .modal-container {
+    transform: scale(1);
+    opacity: 1;
 }
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    justify-content: space-between;
+    margin-bottom: 8px;
 }
 
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #FFF 0%, #E2E8F0 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .btn-close {
@@ -248,18 +338,49 @@
     color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
-    transition: var(--transition-fast);
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
 }
 
 .btn-close:hover {
     color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .modal-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     color: var(--text-muted);
     margin-bottom: 28px;
     line-height: 1.5;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-wrapper .input-field {
+    width: 100%;
+    padding-right: 48px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.15s ease;
+    padding: 4px;
+}
+
+.toggle-password:hover {
+    color: var(--text-primary);
 }
 
 .modal-footer {
@@ -269,83 +390,77 @@
     margin-top: 32px;
 }
 
-/* 5. Alerts & Badges */
-.error-card {
-    background: rgba(244, 63, 94, 0.08);
-    border: 1px solid rgba(244, 63, 94, 0.2);
-    color: #FCA5A5;
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    margin-top: 20px;
-    text-align: left;
-    line-height: 1.5;
+/* ==========================================
+   6. AMBIENT GLOW DECORATIONS
+   ========================================== */
+
+.ambient-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
 }
 
-.success-card {
-    background: rgba(163, 230, 53, 0.04);
-    border: 1px solid rgba(163, 230, 53, 0.2);
-    color: var(--text-primary);
-    padding: 32px 24px;
-    border-radius: 16px;
-    text-align: center;
-    animation: fade-in-up 0.4s ease;
+.glow-orange {
+    position: absolute;
+    top: -15%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 126, 64, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(20px);
 }
 
-.success-icon {
-    font-size: 2.5rem;
-    margin-bottom: 16px;
-    display: inline-block;
-    filter: drop-shadow(0 0 10px rgba(163, 230, 53, 0.3));
+.glow-green {
+    position: absolute;
+    bottom: 10%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(163, 230, 53, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(20px);
 }
 
-.success-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 8px;
+.glow-center {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(255, 126, 64, 0.03) 0%, transparent 70%);
+    filter: blur(30px);
 }
 
-.success-desc {
+/* ==========================================
+   7. PRICING FEATURES LIST (used in showcase cards)
+   ========================================== */
+
+.pricing-features {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pricing-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
-.badge-success {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34D399;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin: 28px 0;
-}
-
-.divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.divider:not(:empty)::before {
-    margin-right: 16px;
-}
-
-.divider:not(:empty)::after {
-    margin-left: 16px;
-}
-
-.hidden {
-    display: none !important;
+.pricing-features li::before {
+    content: '✓';
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
 }

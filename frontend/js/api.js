@@ -1,12 +1,12 @@
 import { API_BASE_URL } from "./config.js";
 
 /**
- * Trigger OTP authentication code transmission.
+ * Request a login link or code for the given email.
  * @param {string} email User email input
  * @returns {Promise<object>} Response payload
  */
 async function sendOtp(email) {
-    console.log(`[API] Triggering OTP send for: ${email}`);
+    console.log(`[API] Requesting login link for: ${email}`);
     try {
         const response = await fetch(`${API_BASE_URL}/auth/otp/send`, {
             method: "POST",
@@ -15,7 +15,7 @@ async function sendOtp(email) {
         });
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.detail || "Failed to transmit OTP");
+            throw new Error(err.detail || "Failed to send login link");
         }
         return await response.json();
     } catch (error) {
@@ -25,13 +25,13 @@ async function sendOtp(email) {
 }
 
 /**
- * Validate received email OTP code block.
+ * Validate the login code received via email.
  * @param {string} email User email address
- * @param {string} code OTP validation code token
+ * @param {string} code Login code from email
  * @returns {Promise<object>} Session tokens
  */
 async function verifyOtp(email, code) {
-    console.log(`[API] Verifying OTP for: ${email}`);
+    console.log(`[API] Verifying login code for: ${email}`);
     try {
         const response = await fetch(`${API_BASE_URL}/auth/otp/verify`, {
             method: "POST",
@@ -40,7 +40,7 @@ async function verifyOtp(email, code) {
         });
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.detail || "Invalid verification code");
+            throw new Error(err.detail || "Invalid login code");
         }
         return await response.json();
     } catch (error) {
